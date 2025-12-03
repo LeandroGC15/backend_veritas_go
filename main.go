@@ -1,0 +1,107 @@
+package main
+
+import (
+	"log"
+
+	"Veritasbackend/internal/domain/repositories"
+	"Veritasbackend/internal/handler"
+	"Veritasbackend/internal/infrastructure/config"
+	"Veritasbackend/internal/infrastructure/database"
+	"Veritasbackend/internal/infrastructure/middleware"
+	"Veritasbackend/internal/usecase/auth"
+	"Veritasbackend/internal/usecase/dashboard"
+	"Veritasbackend/internal/usecase/stock"
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
+)
+
+func main() {
+	// Cargar variables de entorno
+	if err := godotenv.Load(); err != nil {
+		log.Println("No .env file found, using environment variables")
+	}
+
+	cfg := config.Load()
+
+	// Conectar a la base de datos
+	dbClient, err := database.NewClient(cfg)
+	if err != nil {
+		log.Fatalf("Failed to connect to database: %v", err)
+	}
+	defer dbClient.Close()
+
+	// Inicializar repositorios
+	userRepo := repositories.NewUserRepository(dbClient)
+	tenantRepo := repositories.NewTenantRepository(dbClient)
+	productRepo := repositories.NewProductRepository(dbClient)
+	invoiceRepo := repositories.NewInvoiceRepository(dbClient)
+
+	// Inicializar casos de uso
+	loginUseCase := auth.NewLoginUseCase(userRepo, tenantRepo)
+	getCurrentUserUseCase := auth.NewGetCurrentUserUseCase(userRepo)
+	getMetricsUseCase := dashboard.NewGetMetricsUseCase(productRepo, invoiceRepo)
+	getReportsUseCase := dashboard.NewGetReportsUseCase(invoiceRepo)
+	listProductsUseCase := stock.NewListProductsUseCase(productRepo)
+	createProductUseCase := stock.NewCreateProductUseCase(productRepo)
+	updateProductUseCase := stock.NewUpdateProductUseCase(productRepo)
+	deleteProductUseCase := stock.NewDeleteProductUseCase(productRepo)
+	uploadProductsUseCase := stock.NewUploadProductsUseCase(productRepo)
+
+	// Inicializar handlers
+	authHandler := handler.NewAuthHandler(loginUseCase, getCurrentUserUseCase)
+	dashboardHandler := handler.NewDashboardHandler(getMetricsUseCase, getReportsUseCase)
+	stockHandler := handler.NewStockHandler(
+		listProductsUseCase,
+		createProductUseCase,
+		updateProductUseCase,
+		deleteProductUseCase,
+		uploadProductsUseCase,
+	)
+
+	// Configurar Gin
+	if cfg.Server.GinMode == "release" {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
+	r := gin.Default()
+
+	// Configurar CORS
+	corsConfig := cors.DefaultConfig()
+	corsConfig.AllowOrigins = []string{cfg.CORS.AllowedOrigins}
+	corsConfig.AllowHeaders = []string{"Origin", "Content-Type", "Accept", "Authorization", "X-Tenant-ID"}
+	corsConfig.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
+	r.Use(cors.New(corsConfig))
+
+	// Rutas públicas
+	api := r.Group("/api")
+	{
+		api.POST("/auth/login", authHandler.Login)
+	}
+
+	// Rutas protegidas
+	protected := api.Group("")
+	protected.Use(middleware.AuthMiddleware())
+	protected.Use(middleware.TenantMiddleware())
+	{
+		// Auth
+		protected.GET("/auth/me", authHandler.GetCurrentUser)
+
+		// Dashboard
+		protected.GET("/dashboard/metrics", dashboardHandler.GetMetrics)
+		protected.GET("/dashboard/reports", dashboardHandler.GetReports)
+
+		// Stock
+		protected.GET("/stock", stockHandler.ListProducts)
+		protected.POST("/stock", stockHandler.CreateProduct)
+		protected.PUT("/stock/:id", stockHandler.UpdateProduct)
+		protected.DELETE("/stock/:id", stockHandler.DeleteProduct)
+		protected.POST("/stock/upload", stockHandler.UploadProducts)
+	}
+
+	log.Printf("🚀 Server starting on port %s", cfg.Server.Port)
+	if err := r.Run(":" + cfg.Server.Port); err != nil {
+		log.Fatalf("Failed to start server: %v", err)
+	}
+}
+
