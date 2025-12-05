@@ -28,6 +28,27 @@ type Invoice struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the InvoiceQuery when eager-loading is set.
+	Edges InvoiceEdges `json:"edges"`
+}
+
+// InvoiceEdges holds the relations/edges for other nodes in the graph.
+type InvoiceEdges struct {
+	// Items holds the value of the items edge.
+	Items []*InvoiceItem `json:"items,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// ItemsOrErr returns the Items value or an error if the edge
+// was not loaded in eager-loading.
+func (e InvoiceEdges) ItemsOrErr() ([]*InvoiceItem, error) {
+	if e.loadedTypes[0] {
+		return e.Items, nil
+	}
+	return nil, &NotLoadedError{edge: "items"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -103,6 +124,11 @@ func (i *Invoice) assignValues(columns []string, values []interface{}) error {
 		}
 	}
 	return nil
+}
+
+// QueryItems queries the "items" edge of the Invoice entity.
+func (i *Invoice) QueryItems() *InvoiceItemQuery {
+	return (&InvoiceClient{config: i.config}).QueryItems(i)
 }
 
 // Update returns a builder for updating this Invoice.

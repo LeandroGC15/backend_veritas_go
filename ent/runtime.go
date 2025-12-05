@@ -4,6 +4,7 @@ package ent
 
 import (
 	"Veritasbackend/ent/invoice"
+	"Veritasbackend/ent/invoiceitem"
 	"Veritasbackend/ent/product"
 	"Veritasbackend/ent/schema"
 	"Veritasbackend/ent/tenant"
@@ -35,6 +36,20 @@ func init() {
 	invoice.DefaultUpdatedAt = invoiceDescUpdatedAt.Default.(func() time.Time)
 	// invoice.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	invoice.UpdateDefaultUpdatedAt = invoiceDescUpdatedAt.UpdateDefault.(func() time.Time)
+	invoiceitemFields := schema.InvoiceItem{}.Fields()
+	_ = invoiceitemFields
+	// invoiceitemDescQuantity is the schema descriptor for quantity field.
+	invoiceitemDescQuantity := invoiceitemFields[2].Descriptor()
+	// invoiceitem.QuantityValidator is a validator for the "quantity" field. It is called by the builders before save.
+	invoiceitem.QuantityValidator = invoiceitemDescQuantity.Validators[0].(func(int) error)
+	// invoiceitemDescUnitPrice is the schema descriptor for unit_price field.
+	invoiceitemDescUnitPrice := invoiceitemFields[3].Descriptor()
+	// invoiceitem.UnitPriceValidator is a validator for the "unit_price" field. It is called by the builders before save.
+	invoiceitem.UnitPriceValidator = invoiceitemDescUnitPrice.Validators[0].(func(float64) error)
+	// invoiceitemDescSubtotal is the schema descriptor for subtotal field.
+	invoiceitemDescSubtotal := invoiceitemFields[4].Descriptor()
+	// invoiceitem.SubtotalValidator is a validator for the "subtotal" field. It is called by the builders before save.
+	invoiceitem.SubtotalValidator = invoiceitemDescSubtotal.Validators[0].(func(float64) error)
 	productFields := schema.Product{}.Fields()
 	_ = productFields
 	// productDescName is the schema descriptor for name field.

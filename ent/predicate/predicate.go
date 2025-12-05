@@ -9,6 +9,9 @@ import (
 // Invoice is the predicate function for invoice builders.
 type Invoice func(*sql.Selector)
 
+// InvoiceItem is the predicate function for invoiceitem builders.
+type InvoiceItem func(*sql.Selector)
+
 // Product is the predicate function for product builders.
 type Product func(*sql.Selector)
 

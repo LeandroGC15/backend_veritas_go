@@ -4,6 +4,7 @@ package ent
 
 import (
 	"Veritasbackend/ent/invoice"
+	"Veritasbackend/ent/invoiceitem"
 	"context"
 	"errors"
 	"fmt"
@@ -78,6 +79,21 @@ func (ic *InvoiceCreate) SetNillableUpdatedAt(t *time.Time) *InvoiceCreate {
 		ic.SetUpdatedAt(*t)
 	}
 	return ic
+}
+
+// AddItemIDs adds the "items" edge to the InvoiceItem entity by IDs.
+func (ic *InvoiceCreate) AddItemIDs(ids ...int) *InvoiceCreate {
+	ic.mutation.AddItemIDs(ids...)
+	return ic
+}
+
+// AddItems adds the "items" edges to the InvoiceItem entity.
+func (ic *InvoiceCreate) AddItems(i ...*InvoiceItem) *InvoiceCreate {
+	ids := make([]int, len(i))
+	for j := range i {
+		ids[j] = i[j].ID
+	}
+	return ic.AddItemIDs(ids...)
 }
 
 // Mutation returns the InvoiceMutation object of the builder.
@@ -270,6 +286,25 @@ func (ic *InvoiceCreate) createSpec() (*Invoice, *sqlgraph.CreateSpec) {
 			Column: invoice.FieldUpdatedAt,
 		})
 		_node.UpdatedAt = value
+	}
+	if nodes := ic.mutation.ItemsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   invoice.ItemsTable,
+			Columns: []string{invoice.ItemsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: invoiceitem.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

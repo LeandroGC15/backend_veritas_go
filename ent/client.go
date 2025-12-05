@@ -10,12 +10,14 @@ import (
 	"Veritasbackend/ent/migrate"
 
 	"Veritasbackend/ent/invoice"
+	"Veritasbackend/ent/invoiceitem"
 	"Veritasbackend/ent/product"
 	"Veritasbackend/ent/tenant"
 	"Veritasbackend/ent/user"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // Client is the client that holds all ent builders.
@@ -25,6 +27,8 @@ type Client struct {
 	Schema *migrate.Schema
 	// Invoice is the client for interacting with the Invoice builders.
 	Invoice *InvoiceClient
+	// InvoiceItem is the client for interacting with the InvoiceItem builders.
+	InvoiceItem *InvoiceItemClient
 	// Product is the client for interacting with the Product builders.
 	Product *ProductClient
 	// Tenant is the client for interacting with the Tenant builders.
@@ -45,6 +49,7 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Invoice = NewInvoiceClient(c.config)
+	c.InvoiceItem = NewInvoiceItemClient(c.config)
 	c.Product = NewProductClient(c.config)
 	c.Tenant = NewTenantClient(c.config)
 	c.User = NewUserClient(c.config)
@@ -79,12 +84,13 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:     ctx,
-		config:  cfg,
-		Invoice: NewInvoiceClient(cfg),
-		Product: NewProductClient(cfg),
-		Tenant:  NewTenantClient(cfg),
-		User:    NewUserClient(cfg),
+		ctx:         ctx,
+		config:      cfg,
+		Invoice:     NewInvoiceClient(cfg),
+		InvoiceItem: NewInvoiceItemClient(cfg),
+		Product:     NewProductClient(cfg),
+		Tenant:      NewTenantClient(cfg),
+		User:        NewUserClient(cfg),
 	}, nil
 }
 
@@ -102,12 +108,13 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:     ctx,
-		config:  cfg,
-		Invoice: NewInvoiceClient(cfg),
-		Product: NewProductClient(cfg),
-		Tenant:  NewTenantClient(cfg),
-		User:    NewUserClient(cfg),
+		ctx:         ctx,
+		config:      cfg,
+		Invoice:     NewInvoiceClient(cfg),
+		InvoiceItem: NewInvoiceItemClient(cfg),
+		Product:     NewProductClient(cfg),
+		Tenant:      NewTenantClient(cfg),
+		User:        NewUserClient(cfg),
 	}, nil
 }
 
@@ -138,6 +145,7 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	c.Invoice.Use(hooks...)
+	c.InvoiceItem.Use(hooks...)
 	c.Product.Use(hooks...)
 	c.Tenant.Use(hooks...)
 	c.User.Use(hooks...)
@@ -228,9 +236,131 @@ func (c *InvoiceClient) GetX(ctx context.Context, id int) *Invoice {
 	return obj
 }
 
+// QueryItems queries the items edge of a Invoice.
+func (c *InvoiceClient) QueryItems(i *Invoice) *InvoiceItemQuery {
+	query := &InvoiceItemQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := i.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(invoice.Table, invoice.FieldID, id),
+			sqlgraph.To(invoiceitem.Table, invoiceitem.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, invoice.ItemsTable, invoice.ItemsColumn),
+		)
+		fromV = sqlgraph.Neighbors(i.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *InvoiceClient) Hooks() []Hook {
 	return c.hooks.Invoice
+}
+
+// InvoiceItemClient is a client for the InvoiceItem schema.
+type InvoiceItemClient struct {
+	config
+}
+
+// NewInvoiceItemClient returns a client for the InvoiceItem from the given config.
+func NewInvoiceItemClient(c config) *InvoiceItemClient {
+	return &InvoiceItemClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `invoiceitem.Hooks(f(g(h())))`.
+func (c *InvoiceItemClient) Use(hooks ...Hook) {
+	c.hooks.InvoiceItem = append(c.hooks.InvoiceItem, hooks...)
+}
+
+// Create returns a builder for creating a InvoiceItem entity.
+func (c *InvoiceItemClient) Create() *InvoiceItemCreate {
+	mutation := newInvoiceItemMutation(c.config, OpCreate)
+	return &InvoiceItemCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of InvoiceItem entities.
+func (c *InvoiceItemClient) CreateBulk(builders ...*InvoiceItemCreate) *InvoiceItemCreateBulk {
+	return &InvoiceItemCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for InvoiceItem.
+func (c *InvoiceItemClient) Update() *InvoiceItemUpdate {
+	mutation := newInvoiceItemMutation(c.config, OpUpdate)
+	return &InvoiceItemUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *InvoiceItemClient) UpdateOne(ii *InvoiceItem) *InvoiceItemUpdateOne {
+	mutation := newInvoiceItemMutation(c.config, OpUpdateOne, withInvoiceItem(ii))
+	return &InvoiceItemUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *InvoiceItemClient) UpdateOneID(id int) *InvoiceItemUpdateOne {
+	mutation := newInvoiceItemMutation(c.config, OpUpdateOne, withInvoiceItemID(id))
+	return &InvoiceItemUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for InvoiceItem.
+func (c *InvoiceItemClient) Delete() *InvoiceItemDelete {
+	mutation := newInvoiceItemMutation(c.config, OpDelete)
+	return &InvoiceItemDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *InvoiceItemClient) DeleteOne(ii *InvoiceItem) *InvoiceItemDeleteOne {
+	return c.DeleteOneID(ii.ID)
+}
+
+// DeleteOne returns a builder for deleting the given entity by its id.
+func (c *InvoiceItemClient) DeleteOneID(id int) *InvoiceItemDeleteOne {
+	builder := c.Delete().Where(invoiceitem.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &InvoiceItemDeleteOne{builder}
+}
+
+// Query returns a query builder for InvoiceItem.
+func (c *InvoiceItemClient) Query() *InvoiceItemQuery {
+	return &InvoiceItemQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a InvoiceItem entity by its id.
+func (c *InvoiceItemClient) Get(ctx context.Context, id int) (*InvoiceItem, error) {
+	return c.Query().Where(invoiceitem.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *InvoiceItemClient) GetX(ctx context.Context, id int) *InvoiceItem {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryInvoice queries the invoice edge of a InvoiceItem.
+func (c *InvoiceItemClient) QueryInvoice(ii *InvoiceItem) *InvoiceQuery {
+	query := &InvoiceQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := ii.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(invoiceitem.Table, invoiceitem.FieldID, id),
+			sqlgraph.To(invoice.Table, invoice.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, invoiceitem.InvoiceTable, invoiceitem.InvoiceColumn),
+		)
+		fromV = sqlgraph.Neighbors(ii.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *InvoiceItemClient) Hooks() []Hook {
+	return c.hooks.InvoiceItem
 }
 
 // ProductClient is a client for the Product schema.

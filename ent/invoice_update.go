@@ -4,6 +4,7 @@ package ent
 
 import (
 	"Veritasbackend/ent/invoice"
+	"Veritasbackend/ent/invoiceitem"
 	"Veritasbackend/ent/predicate"
 	"context"
 	"errors"
@@ -87,9 +88,45 @@ func (iu *InvoiceUpdate) SetUpdatedAt(t time.Time) *InvoiceUpdate {
 	return iu
 }
 
+// AddItemIDs adds the "items" edge to the InvoiceItem entity by IDs.
+func (iu *InvoiceUpdate) AddItemIDs(ids ...int) *InvoiceUpdate {
+	iu.mutation.AddItemIDs(ids...)
+	return iu
+}
+
+// AddItems adds the "items" edges to the InvoiceItem entity.
+func (iu *InvoiceUpdate) AddItems(i ...*InvoiceItem) *InvoiceUpdate {
+	ids := make([]int, len(i))
+	for j := range i {
+		ids[j] = i[j].ID
+	}
+	return iu.AddItemIDs(ids...)
+}
+
 // Mutation returns the InvoiceMutation object of the builder.
 func (iu *InvoiceUpdate) Mutation() *InvoiceMutation {
 	return iu.mutation
+}
+
+// ClearItems clears all "items" edges to the InvoiceItem entity.
+func (iu *InvoiceUpdate) ClearItems() *InvoiceUpdate {
+	iu.mutation.ClearItems()
+	return iu
+}
+
+// RemoveItemIDs removes the "items" edge to InvoiceItem entities by IDs.
+func (iu *InvoiceUpdate) RemoveItemIDs(ids ...int) *InvoiceUpdate {
+	iu.mutation.RemoveItemIDs(ids...)
+	return iu
+}
+
+// RemoveItems removes "items" edges to InvoiceItem entities.
+func (iu *InvoiceUpdate) RemoveItems(i ...*InvoiceItem) *InvoiceUpdate {
+	ids := make([]int, len(i))
+	for j := range i {
+		ids[j] = i[j].ID
+	}
+	return iu.RemoveItemIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -245,6 +282,60 @@ func (iu *InvoiceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: invoice.FieldUpdatedAt,
 		})
 	}
+	if iu.mutation.ItemsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   invoice.ItemsTable,
+			Columns: []string{invoice.ItemsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: invoiceitem.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := iu.mutation.RemovedItemsIDs(); len(nodes) > 0 && !iu.mutation.ItemsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   invoice.ItemsTable,
+			Columns: []string{invoice.ItemsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: invoiceitem.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := iu.mutation.ItemsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   invoice.ItemsTable,
+			Columns: []string{invoice.ItemsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: invoiceitem.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, iu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{invoice.Label}
@@ -323,9 +414,45 @@ func (iuo *InvoiceUpdateOne) SetUpdatedAt(t time.Time) *InvoiceUpdateOne {
 	return iuo
 }
 
+// AddItemIDs adds the "items" edge to the InvoiceItem entity by IDs.
+func (iuo *InvoiceUpdateOne) AddItemIDs(ids ...int) *InvoiceUpdateOne {
+	iuo.mutation.AddItemIDs(ids...)
+	return iuo
+}
+
+// AddItems adds the "items" edges to the InvoiceItem entity.
+func (iuo *InvoiceUpdateOne) AddItems(i ...*InvoiceItem) *InvoiceUpdateOne {
+	ids := make([]int, len(i))
+	for j := range i {
+		ids[j] = i[j].ID
+	}
+	return iuo.AddItemIDs(ids...)
+}
+
 // Mutation returns the InvoiceMutation object of the builder.
 func (iuo *InvoiceUpdateOne) Mutation() *InvoiceMutation {
 	return iuo.mutation
+}
+
+// ClearItems clears all "items" edges to the InvoiceItem entity.
+func (iuo *InvoiceUpdateOne) ClearItems() *InvoiceUpdateOne {
+	iuo.mutation.ClearItems()
+	return iuo
+}
+
+// RemoveItemIDs removes the "items" edge to InvoiceItem entities by IDs.
+func (iuo *InvoiceUpdateOne) RemoveItemIDs(ids ...int) *InvoiceUpdateOne {
+	iuo.mutation.RemoveItemIDs(ids...)
+	return iuo
+}
+
+// RemoveItems removes "items" edges to InvoiceItem entities.
+func (iuo *InvoiceUpdateOne) RemoveItems(i ...*InvoiceItem) *InvoiceUpdateOne {
+	ids := make([]int, len(i))
+	for j := range i {
+		ids[j] = i[j].ID
+	}
+	return iuo.RemoveItemIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -510,6 +637,60 @@ func (iuo *InvoiceUpdateOne) sqlSave(ctx context.Context) (_node *Invoice, err e
 			Value:  value,
 			Column: invoice.FieldUpdatedAt,
 		})
+	}
+	if iuo.mutation.ItemsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   invoice.ItemsTable,
+			Columns: []string{invoice.ItemsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: invoiceitem.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := iuo.mutation.RemovedItemsIDs(); len(nodes) > 0 && !iuo.mutation.ItemsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   invoice.ItemsTable,
+			Columns: []string{invoice.ItemsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: invoiceitem.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := iuo.mutation.ItemsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   invoice.ItemsTable,
+			Columns: []string{invoice.ItemsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: invoiceitem.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &Invoice{config: iuo.config}
 	_spec.Assign = _node.assignValues

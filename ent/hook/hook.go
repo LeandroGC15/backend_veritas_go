@@ -21,6 +21,19 @@ func (f InvoiceFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, err
 	return f(ctx, mv)
 }
 
+// The InvoiceItemFunc type is an adapter to allow the use of ordinary
+// function as InvoiceItem mutator.
+type InvoiceItemFunc func(context.Context, *ent.InvoiceItemMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f InvoiceItemFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.InvoiceItemMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.InvoiceItemMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The ProductFunc type is an adapter to allow the use of ordinary
 // function as Product mutator.
 type ProductFunc func(context.Context, *ent.ProductMutation) (ent.Value, error)

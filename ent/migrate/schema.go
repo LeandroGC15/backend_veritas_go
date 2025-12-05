@@ -41,6 +41,41 @@ var (
 			},
 		},
 	}
+	// InvoiceItemsColumns holds the columns for the "invoice_items" table.
+	InvoiceItemsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "product_id", Type: field.TypeInt},
+		{Name: "quantity", Type: field.TypeInt},
+		{Name: "unit_price", Type: field.TypeFloat64},
+		{Name: "subtotal", Type: field.TypeFloat64},
+		{Name: "invoice_id", Type: field.TypeInt},
+	}
+	// InvoiceItemsTable holds the schema information for the "invoice_items" table.
+	InvoiceItemsTable = &schema.Table{
+		Name:       "invoice_items",
+		Columns:    InvoiceItemsColumns,
+		PrimaryKey: []*schema.Column{InvoiceItemsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "invoice_items_invoices_items",
+				Columns:    []*schema.Column{InvoiceItemsColumns[5]},
+				RefColumns: []*schema.Column{InvoicesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "invoiceitem_invoice_id",
+				Unique:  false,
+				Columns: []*schema.Column{InvoiceItemsColumns[5]},
+			},
+			{
+				Name:    "invoiceitem_product_id",
+				Unique:  false,
+				Columns: []*schema.Column{InvoiceItemsColumns[1]},
+			},
+		},
+	}
 	// ProductsColumns holds the columns for the "products" table.
 	ProductsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -125,6 +160,7 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		InvoicesTable,
+		InvoiceItemsTable,
 		ProductsTable,
 		TenantsTable,
 		UsersTable,
@@ -132,4 +168,5 @@ var (
 )
 
 func init() {
+	InvoiceItemsTable.ForeignKeys[0].RefTable = InvoicesTable
 }

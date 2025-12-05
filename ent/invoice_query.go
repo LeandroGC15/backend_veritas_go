@@ -4,8 +4,10 @@ package ent
 
 import (
 	"Veritasbackend/ent/invoice"
+	"Veritasbackend/ent/invoiceitem"
 	"Veritasbackend/ent/predicate"
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -23,6 +25,8 @@ type InvoiceQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Invoice
+	// eager-loading edges.
+	withItems *InvoiceItemQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -57,6 +61,28 @@ func (iq *InvoiceQuery) Unique(unique bool) *InvoiceQuery {
 func (iq *InvoiceQuery) Order(o ...OrderFunc) *InvoiceQuery {
 	iq.order = append(iq.order, o...)
 	return iq
+}
+
+// QueryItems chains the current query on the "items" edge.
+func (iq *InvoiceQuery) QueryItems() *InvoiceItemQuery {
+	query := &InvoiceItemQuery{config: iq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := iq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := iq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(invoice.Table, invoice.FieldID, selector),
+			sqlgraph.To(invoiceitem.Table, invoiceitem.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, invoice.ItemsTable, invoice.ItemsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(iq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first Invoice entity from the query.
@@ -240,11 +266,23 @@ func (iq *InvoiceQuery) Clone() *InvoiceQuery {
 		offset:     iq.offset,
 		order:      append([]OrderFunc{}, iq.order...),
 		predicates: append([]predicate.Invoice{}, iq.predicates...),
+		withItems:  iq.withItems.Clone(),
 		// clone intermediate query.
 		sql:    iq.sql.Clone(),
 		path:   iq.path,
 		unique: iq.unique,
 	}
+}
+
+// WithItems tells the query-builder to eager-load the nodes that are connected to
+// the "items" edge. The optional arguments are used to configure the query builder of the edge.
+func (iq *InvoiceQuery) WithItems(opts ...func(*InvoiceItemQuery)) *InvoiceQuery {
+	query := &InvoiceItemQuery{config: iq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	iq.withItems = query
+	return iq
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -315,8 +353,11 @@ func (iq *InvoiceQuery) prepareQuery(ctx context.Context) error {
 
 func (iq *InvoiceQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Invoice, error) {
 	var (
-		nodes = []*Invoice{}
-		_spec = iq.querySpec()
+		nodes       = []*Invoice{}
+		_spec       = iq.querySpec()
+		loadedTypes = [1]bool{
+			iq.withItems != nil,
+		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		return (*Invoice).scanValues(nil, columns)
@@ -324,6 +365,7 @@ func (iq *InvoiceQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Invo
 	_spec.Assign = func(columns []string, values []interface{}) error {
 		node := &Invoice{config: iq.config}
 		nodes = append(nodes, node)
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	for i := range hooks {
@@ -335,6 +377,32 @@ func (iq *InvoiceQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Invo
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+
+	if query := iq.withItems; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[int]*Invoice)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Items = []*InvoiceItem{}
+		}
+		query.Where(predicate.InvoiceItem(func(s *sql.Selector) {
+			s.Where(sql.InValues(invoice.ItemsColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.InvoiceID
+			node, ok := nodeids[fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "invoice_id" returned %v for node %v`, fk, n.ID)
+			}
+			node.Edges.Items = append(node.Edges.Items, n)
+		}
+	}
+
 	return nodes, nil
 }
 

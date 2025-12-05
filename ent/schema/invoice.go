@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"entgo.io/ent"
+	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 )
@@ -37,7 +38,9 @@ func (Invoice) Fields() []ent.Field {
 
 // Edges of the Invoice.
 func (Invoice) Edges() []ent.Edge {
-	return []ent.Edge{}
+	return []ent.Edge{
+		edge.To("items", InvoiceItem.Type),
+	}
 }
 
 // Indexes of the Invoice.

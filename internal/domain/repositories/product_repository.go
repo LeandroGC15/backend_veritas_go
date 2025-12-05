@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"fmt"
 
 	"Veritasbackend/ent"
 	"Veritasbackend/ent/product"
@@ -12,6 +13,7 @@ type ProductRepository interface {
 	FindByID(ctx context.Context, id int) (*ent.Product, error)
 	Create(ctx context.Context, tenantID int, name, description, sku string, price float64, stock int) (*ent.Product, error)
 	Update(ctx context.Context, id int, name, description, sku string, price float64, stock int) (*ent.Product, error)
+	UpdateStock(ctx context.Context, id int, quantity int) error
 	Delete(ctx context.Context, id int) error
 	CountByTenant(ctx context.Context, tenantID int) (int, error)
 }
@@ -83,6 +85,28 @@ func (r *productRepository) Update(ctx context.Context, id int, name, descriptio
 	}
 
 	return builder.Save(ctx)
+}
+
+func (r *productRepository) UpdateStock(ctx context.Context, id int, quantity int) error {
+	product, err := r.client.Product.
+		Query().
+		Where(product.IDEQ(id)).
+		Only(ctx)
+	if err != nil {
+		return err
+	}
+
+	newStock := product.Stock - quantity
+	if newStock < 0 {
+		return fmt.Errorf("stock insuficiente: disponible %d, solicitado %d", product.Stock, quantity)
+	}
+
+	_, err = r.client.Product.
+		UpdateOneID(id).
+		SetStock(newStock).
+		Save(ctx)
+
+	return err
 }
 
 func (r *productRepository) Delete(ctx context.Context, id int) error {

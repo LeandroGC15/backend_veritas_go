@@ -23,8 +23,17 @@ const (
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
+	// EdgeItems holds the string denoting the items edge name in mutations.
+	EdgeItems = "items"
 	// Table holds the table name of the invoice in the database.
 	Table = "invoices"
+	// ItemsTable is the table that holds the items relation/edge.
+	ItemsTable = "invoice_items"
+	// ItemsInverseTable is the table name for the InvoiceItem entity.
+	// It exists in this package in order to avoid circular dependency with the "invoiceitem" package.
+	ItemsInverseTable = "invoice_items"
+	// ItemsColumn is the table column denoting the items relation/edge.
+	ItemsColumn = "invoice_id"
 )
 
 // Columns holds all SQL columns for invoice fields.

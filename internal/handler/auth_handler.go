@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"log"
 	"net/http"
 
 	"Veritasbackend/internal/usecase/auth"
@@ -11,12 +12,14 @@ import (
 type AuthHandler struct {
 	loginUseCase         *auth.LoginUseCase
 	getCurrentUserUseCase *auth.GetCurrentUserUseCase
+	createUserUseCase    *auth.CreateUserUseCase
 }
 
-func NewAuthHandler(loginUseCase *auth.LoginUseCase, getCurrentUserUseCase *auth.GetCurrentUserUseCase) *AuthHandler {
+func NewAuthHandler(loginUseCase *auth.LoginUseCase, getCurrentUserUseCase *auth.GetCurrentUserUseCase, createUserUseCase *auth.CreateUserUseCase) *AuthHandler {
 	return &AuthHandler{
 		loginUseCase:          loginUseCase,
 		getCurrentUserUseCase: getCurrentUserUseCase,
+		createUserUseCase:     createUserUseCase,
 	}
 }
 
@@ -61,5 +64,29 @@ func (h *AuthHandler) GetCurrentUser(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"user": user})
+}
+
+func (h *AuthHandler) CreateUser(c *gin.Context) {
+	log.Println("📥 AuthHandler.CreateUser: Nueva petición para crear usuario")
+
+	var req auth.CreateUserRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		log.Printf("❌ AuthHandler.CreateUser: Error al parsear JSON: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	log.Printf("📋 AuthHandler.CreateUser: Datos recibidos - Email: %s, Name: %s, Role: %s", req.Email, req.Name, req.Role)
+
+	// El caso de uso ahora crea automáticamente un tenant único para cada usuario
+	user, err := h.createUserUseCase.Execute(c.Request.Context(), req)
+	if err != nil {
+		log.Printf("❌ AuthHandler.CreateUser: Error en caso de uso: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	log.Printf("✅ AuthHandler.CreateUser: Usuario creado exitosamente - ID: %d", user.ID)
+	c.JSON(http.StatusCreated, gin.H{"user": user})
 }
 
