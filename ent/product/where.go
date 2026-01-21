@@ -101,6 +101,34 @@ func Price(v float64) predicate.Product {
 	})
 }
 
+// PurchasePrice applies equality check predicate on the "purchase_price" field. It's identical to PurchasePriceEQ.
+func PurchasePrice(v float64) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldPurchasePrice), v))
+	})
+}
+
+// RetailPrice applies equality check predicate on the "retail_price" field. It's identical to RetailPriceEQ.
+func RetailPrice(v float64) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldRetailPrice), v))
+	})
+}
+
+// WholesalePrice applies equality check predicate on the "wholesale_price" field. It's identical to WholesalePriceEQ.
+func WholesalePrice(v float64) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldWholesalePrice), v))
+	})
+}
+
+// MinWholesaleQuantity applies equality check predicate on the "min_wholesale_quantity" field. It's identical to MinWholesaleQuantityEQ.
+func MinWholesaleQuantity(v int) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldMinWholesaleQuantity), v))
+	})
+}
+
 // Stock applies equality check predicate on the "stock" field. It's identical to StockEQ.
 func Stock(v int) predicate.Product {
 	return predicate.Product(func(s *sql.Selector) {
@@ -445,6 +473,338 @@ func PriceLT(v float64) predicate.Product {
 func PriceLTE(v float64) predicate.Product {
 	return predicate.Product(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldPrice), v))
+	})
+}
+
+// PurchasePriceEQ applies the EQ predicate on the "purchase_price" field.
+func PurchasePriceEQ(v float64) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldPurchasePrice), v))
+	})
+}
+
+// PurchasePriceNEQ applies the NEQ predicate on the "purchase_price" field.
+func PurchasePriceNEQ(v float64) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldPurchasePrice), v))
+	})
+}
+
+// PurchasePriceIn applies the In predicate on the "purchase_price" field.
+func PurchasePriceIn(vs ...float64) predicate.Product {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Product(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldPurchasePrice), v...))
+	})
+}
+
+// PurchasePriceNotIn applies the NotIn predicate on the "purchase_price" field.
+func PurchasePriceNotIn(vs ...float64) predicate.Product {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Product(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldPurchasePrice), v...))
+	})
+}
+
+// PurchasePriceGT applies the GT predicate on the "purchase_price" field.
+func PurchasePriceGT(v float64) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldPurchasePrice), v))
+	})
+}
+
+// PurchasePriceGTE applies the GTE predicate on the "purchase_price" field.
+func PurchasePriceGTE(v float64) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldPurchasePrice), v))
+	})
+}
+
+// PurchasePriceLT applies the LT predicate on the "purchase_price" field.
+func PurchasePriceLT(v float64) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldPurchasePrice), v))
+	})
+}
+
+// PurchasePriceLTE applies the LTE predicate on the "purchase_price" field.
+func PurchasePriceLTE(v float64) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldPurchasePrice), v))
+	})
+}
+
+// RetailPriceEQ applies the EQ predicate on the "retail_price" field.
+func RetailPriceEQ(v float64) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldRetailPrice), v))
+	})
+}
+
+// RetailPriceNEQ applies the NEQ predicate on the "retail_price" field.
+func RetailPriceNEQ(v float64) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldRetailPrice), v))
+	})
+}
+
+// RetailPriceIn applies the In predicate on the "retail_price" field.
+func RetailPriceIn(vs ...float64) predicate.Product {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Product(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldRetailPrice), v...))
+	})
+}
+
+// RetailPriceNotIn applies the NotIn predicate on the "retail_price" field.
+func RetailPriceNotIn(vs ...float64) predicate.Product {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Product(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldRetailPrice), v...))
+	})
+}
+
+// RetailPriceGT applies the GT predicate on the "retail_price" field.
+func RetailPriceGT(v float64) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldRetailPrice), v))
+	})
+}
+
+// RetailPriceGTE applies the GTE predicate on the "retail_price" field.
+func RetailPriceGTE(v float64) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldRetailPrice), v))
+	})
+}
+
+// RetailPriceLT applies the LT predicate on the "retail_price" field.
+func RetailPriceLT(v float64) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldRetailPrice), v))
+	})
+}
+
+// RetailPriceLTE applies the LTE predicate on the "retail_price" field.
+func RetailPriceLTE(v float64) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldRetailPrice), v))
+	})
+}
+
+// WholesalePriceEQ applies the EQ predicate on the "wholesale_price" field.
+func WholesalePriceEQ(v float64) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldWholesalePrice), v))
+	})
+}
+
+// WholesalePriceNEQ applies the NEQ predicate on the "wholesale_price" field.
+func WholesalePriceNEQ(v float64) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldWholesalePrice), v))
+	})
+}
+
+// WholesalePriceIn applies the In predicate on the "wholesale_price" field.
+func WholesalePriceIn(vs ...float64) predicate.Product {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Product(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldWholesalePrice), v...))
+	})
+}
+
+// WholesalePriceNotIn applies the NotIn predicate on the "wholesale_price" field.
+func WholesalePriceNotIn(vs ...float64) predicate.Product {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Product(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldWholesalePrice), v...))
+	})
+}
+
+// WholesalePriceGT applies the GT predicate on the "wholesale_price" field.
+func WholesalePriceGT(v float64) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldWholesalePrice), v))
+	})
+}
+
+// WholesalePriceGTE applies the GTE predicate on the "wholesale_price" field.
+func WholesalePriceGTE(v float64) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldWholesalePrice), v))
+	})
+}
+
+// WholesalePriceLT applies the LT predicate on the "wholesale_price" field.
+func WholesalePriceLT(v float64) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldWholesalePrice), v))
+	})
+}
+
+// WholesalePriceLTE applies the LTE predicate on the "wholesale_price" field.
+func WholesalePriceLTE(v float64) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldWholesalePrice), v))
+	})
+}
+
+// WholesalePriceIsNil applies the IsNil predicate on the "wholesale_price" field.
+func WholesalePriceIsNil() predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldWholesalePrice)))
+	})
+}
+
+// WholesalePriceNotNil applies the NotNil predicate on the "wholesale_price" field.
+func WholesalePriceNotNil() predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldWholesalePrice)))
+	})
+}
+
+// MinWholesaleQuantityEQ applies the EQ predicate on the "min_wholesale_quantity" field.
+func MinWholesaleQuantityEQ(v int) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldMinWholesaleQuantity), v))
+	})
+}
+
+// MinWholesaleQuantityNEQ applies the NEQ predicate on the "min_wholesale_quantity" field.
+func MinWholesaleQuantityNEQ(v int) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldMinWholesaleQuantity), v))
+	})
+}
+
+// MinWholesaleQuantityIn applies the In predicate on the "min_wholesale_quantity" field.
+func MinWholesaleQuantityIn(vs ...int) predicate.Product {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Product(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldMinWholesaleQuantity), v...))
+	})
+}
+
+// MinWholesaleQuantityNotIn applies the NotIn predicate on the "min_wholesale_quantity" field.
+func MinWholesaleQuantityNotIn(vs ...int) predicate.Product {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Product(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldMinWholesaleQuantity), v...))
+	})
+}
+
+// MinWholesaleQuantityGT applies the GT predicate on the "min_wholesale_quantity" field.
+func MinWholesaleQuantityGT(v int) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldMinWholesaleQuantity), v))
+	})
+}
+
+// MinWholesaleQuantityGTE applies the GTE predicate on the "min_wholesale_quantity" field.
+func MinWholesaleQuantityGTE(v int) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldMinWholesaleQuantity), v))
+	})
+}
+
+// MinWholesaleQuantityLT applies the LT predicate on the "min_wholesale_quantity" field.
+func MinWholesaleQuantityLT(v int) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldMinWholesaleQuantity), v))
+	})
+}
+
+// MinWholesaleQuantityLTE applies the LTE predicate on the "min_wholesale_quantity" field.
+func MinWholesaleQuantityLTE(v int) predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldMinWholesaleQuantity), v))
+	})
+}
+
+// MinWholesaleQuantityIsNil applies the IsNil predicate on the "min_wholesale_quantity" field.
+func MinWholesaleQuantityIsNil() predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldMinWholesaleQuantity)))
+	})
+}
+
+// MinWholesaleQuantityNotNil applies the NotNil predicate on the "min_wholesale_quantity" field.
+func MinWholesaleQuantityNotNil() predicate.Product {
+	return predicate.Product(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldMinWholesaleQuantity)))
 	})
 }
 

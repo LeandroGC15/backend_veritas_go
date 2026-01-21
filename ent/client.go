@@ -12,6 +12,10 @@ import (
 	"Veritasbackend/ent/invoice"
 	"Veritasbackend/ent/invoiceitem"
 	"Veritasbackend/ent/product"
+	"Veritasbackend/ent/purchaseinvoice"
+	"Veritasbackend/ent/purchaseinvoiceitem"
+	"Veritasbackend/ent/supplier"
+	"Veritasbackend/ent/supplierpayment"
 	"Veritasbackend/ent/tenant"
 	"Veritasbackend/ent/user"
 
@@ -31,6 +35,14 @@ type Client struct {
 	InvoiceItem *InvoiceItemClient
 	// Product is the client for interacting with the Product builders.
 	Product *ProductClient
+	// PurchaseInvoice is the client for interacting with the PurchaseInvoice builders.
+	PurchaseInvoice *PurchaseInvoiceClient
+	// PurchaseInvoiceItem is the client for interacting with the PurchaseInvoiceItem builders.
+	PurchaseInvoiceItem *PurchaseInvoiceItemClient
+	// Supplier is the client for interacting with the Supplier builders.
+	Supplier *SupplierClient
+	// SupplierPayment is the client for interacting with the SupplierPayment builders.
+	SupplierPayment *SupplierPaymentClient
 	// Tenant is the client for interacting with the Tenant builders.
 	Tenant *TenantClient
 	// User is the client for interacting with the User builders.
@@ -51,6 +63,10 @@ func (c *Client) init() {
 	c.Invoice = NewInvoiceClient(c.config)
 	c.InvoiceItem = NewInvoiceItemClient(c.config)
 	c.Product = NewProductClient(c.config)
+	c.PurchaseInvoice = NewPurchaseInvoiceClient(c.config)
+	c.PurchaseInvoiceItem = NewPurchaseInvoiceItemClient(c.config)
+	c.Supplier = NewSupplierClient(c.config)
+	c.SupplierPayment = NewSupplierPaymentClient(c.config)
 	c.Tenant = NewTenantClient(c.config)
 	c.User = NewUserClient(c.config)
 }
@@ -84,13 +100,17 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:         ctx,
-		config:      cfg,
-		Invoice:     NewInvoiceClient(cfg),
-		InvoiceItem: NewInvoiceItemClient(cfg),
-		Product:     NewProductClient(cfg),
-		Tenant:      NewTenantClient(cfg),
-		User:        NewUserClient(cfg),
+		ctx:                 ctx,
+		config:              cfg,
+		Invoice:             NewInvoiceClient(cfg),
+		InvoiceItem:         NewInvoiceItemClient(cfg),
+		Product:             NewProductClient(cfg),
+		PurchaseInvoice:     NewPurchaseInvoiceClient(cfg),
+		PurchaseInvoiceItem: NewPurchaseInvoiceItemClient(cfg),
+		Supplier:            NewSupplierClient(cfg),
+		SupplierPayment:     NewSupplierPaymentClient(cfg),
+		Tenant:              NewTenantClient(cfg),
+		User:                NewUserClient(cfg),
 	}, nil
 }
 
@@ -108,13 +128,17 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:         ctx,
-		config:      cfg,
-		Invoice:     NewInvoiceClient(cfg),
-		InvoiceItem: NewInvoiceItemClient(cfg),
-		Product:     NewProductClient(cfg),
-		Tenant:      NewTenantClient(cfg),
-		User:        NewUserClient(cfg),
+		ctx:                 ctx,
+		config:              cfg,
+		Invoice:             NewInvoiceClient(cfg),
+		InvoiceItem:         NewInvoiceItemClient(cfg),
+		Product:             NewProductClient(cfg),
+		PurchaseInvoice:     NewPurchaseInvoiceClient(cfg),
+		PurchaseInvoiceItem: NewPurchaseInvoiceItemClient(cfg),
+		Supplier:            NewSupplierClient(cfg),
+		SupplierPayment:     NewSupplierPaymentClient(cfg),
+		Tenant:              NewTenantClient(cfg),
+		User:                NewUserClient(cfg),
 	}, nil
 }
 
@@ -147,6 +171,10 @@ func (c *Client) Use(hooks ...Hook) {
 	c.Invoice.Use(hooks...)
 	c.InvoiceItem.Use(hooks...)
 	c.Product.Use(hooks...)
+	c.PurchaseInvoice.Use(hooks...)
+	c.PurchaseInvoiceItem.Use(hooks...)
+	c.Supplier.Use(hooks...)
+	c.SupplierPayment.Use(hooks...)
 	c.Tenant.Use(hooks...)
 	c.User.Use(hooks...)
 }
@@ -451,6 +479,398 @@ func (c *ProductClient) GetX(ctx context.Context, id int) *Product {
 // Hooks returns the client hooks.
 func (c *ProductClient) Hooks() []Hook {
 	return c.hooks.Product
+}
+
+// PurchaseInvoiceClient is a client for the PurchaseInvoice schema.
+type PurchaseInvoiceClient struct {
+	config
+}
+
+// NewPurchaseInvoiceClient returns a client for the PurchaseInvoice from the given config.
+func NewPurchaseInvoiceClient(c config) *PurchaseInvoiceClient {
+	return &PurchaseInvoiceClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `purchaseinvoice.Hooks(f(g(h())))`.
+func (c *PurchaseInvoiceClient) Use(hooks ...Hook) {
+	c.hooks.PurchaseInvoice = append(c.hooks.PurchaseInvoice, hooks...)
+}
+
+// Create returns a builder for creating a PurchaseInvoice entity.
+func (c *PurchaseInvoiceClient) Create() *PurchaseInvoiceCreate {
+	mutation := newPurchaseInvoiceMutation(c.config, OpCreate)
+	return &PurchaseInvoiceCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of PurchaseInvoice entities.
+func (c *PurchaseInvoiceClient) CreateBulk(builders ...*PurchaseInvoiceCreate) *PurchaseInvoiceCreateBulk {
+	return &PurchaseInvoiceCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for PurchaseInvoice.
+func (c *PurchaseInvoiceClient) Update() *PurchaseInvoiceUpdate {
+	mutation := newPurchaseInvoiceMutation(c.config, OpUpdate)
+	return &PurchaseInvoiceUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PurchaseInvoiceClient) UpdateOne(pi *PurchaseInvoice) *PurchaseInvoiceUpdateOne {
+	mutation := newPurchaseInvoiceMutation(c.config, OpUpdateOne, withPurchaseInvoice(pi))
+	return &PurchaseInvoiceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PurchaseInvoiceClient) UpdateOneID(id int) *PurchaseInvoiceUpdateOne {
+	mutation := newPurchaseInvoiceMutation(c.config, OpUpdateOne, withPurchaseInvoiceID(id))
+	return &PurchaseInvoiceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for PurchaseInvoice.
+func (c *PurchaseInvoiceClient) Delete() *PurchaseInvoiceDelete {
+	mutation := newPurchaseInvoiceMutation(c.config, OpDelete)
+	return &PurchaseInvoiceDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *PurchaseInvoiceClient) DeleteOne(pi *PurchaseInvoice) *PurchaseInvoiceDeleteOne {
+	return c.DeleteOneID(pi.ID)
+}
+
+// DeleteOne returns a builder for deleting the given entity by its id.
+func (c *PurchaseInvoiceClient) DeleteOneID(id int) *PurchaseInvoiceDeleteOne {
+	builder := c.Delete().Where(purchaseinvoice.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PurchaseInvoiceDeleteOne{builder}
+}
+
+// Query returns a query builder for PurchaseInvoice.
+func (c *PurchaseInvoiceClient) Query() *PurchaseInvoiceQuery {
+	return &PurchaseInvoiceQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a PurchaseInvoice entity by its id.
+func (c *PurchaseInvoiceClient) Get(ctx context.Context, id int) (*PurchaseInvoice, error) {
+	return c.Query().Where(purchaseinvoice.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PurchaseInvoiceClient) GetX(ctx context.Context, id int) *PurchaseInvoice {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QuerySupplier queries the supplier edge of a PurchaseInvoice.
+func (c *PurchaseInvoiceClient) QuerySupplier(pi *PurchaseInvoice) *SupplierQuery {
+	query := &SupplierQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := pi.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(purchaseinvoice.Table, purchaseinvoice.FieldID, id),
+			sqlgraph.To(supplier.Table, supplier.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, purchaseinvoice.SupplierTable, purchaseinvoice.SupplierColumn),
+		)
+		fromV = sqlgraph.Neighbors(pi.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *PurchaseInvoiceClient) Hooks() []Hook {
+	return c.hooks.PurchaseInvoice
+}
+
+// PurchaseInvoiceItemClient is a client for the PurchaseInvoiceItem schema.
+type PurchaseInvoiceItemClient struct {
+	config
+}
+
+// NewPurchaseInvoiceItemClient returns a client for the PurchaseInvoiceItem from the given config.
+func NewPurchaseInvoiceItemClient(c config) *PurchaseInvoiceItemClient {
+	return &PurchaseInvoiceItemClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `purchaseinvoiceitem.Hooks(f(g(h())))`.
+func (c *PurchaseInvoiceItemClient) Use(hooks ...Hook) {
+	c.hooks.PurchaseInvoiceItem = append(c.hooks.PurchaseInvoiceItem, hooks...)
+}
+
+// Create returns a builder for creating a PurchaseInvoiceItem entity.
+func (c *PurchaseInvoiceItemClient) Create() *PurchaseInvoiceItemCreate {
+	mutation := newPurchaseInvoiceItemMutation(c.config, OpCreate)
+	return &PurchaseInvoiceItemCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of PurchaseInvoiceItem entities.
+func (c *PurchaseInvoiceItemClient) CreateBulk(builders ...*PurchaseInvoiceItemCreate) *PurchaseInvoiceItemCreateBulk {
+	return &PurchaseInvoiceItemCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for PurchaseInvoiceItem.
+func (c *PurchaseInvoiceItemClient) Update() *PurchaseInvoiceItemUpdate {
+	mutation := newPurchaseInvoiceItemMutation(c.config, OpUpdate)
+	return &PurchaseInvoiceItemUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PurchaseInvoiceItemClient) UpdateOne(pii *PurchaseInvoiceItem) *PurchaseInvoiceItemUpdateOne {
+	mutation := newPurchaseInvoiceItemMutation(c.config, OpUpdateOne, withPurchaseInvoiceItem(pii))
+	return &PurchaseInvoiceItemUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PurchaseInvoiceItemClient) UpdateOneID(id int) *PurchaseInvoiceItemUpdateOne {
+	mutation := newPurchaseInvoiceItemMutation(c.config, OpUpdateOne, withPurchaseInvoiceItemID(id))
+	return &PurchaseInvoiceItemUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for PurchaseInvoiceItem.
+func (c *PurchaseInvoiceItemClient) Delete() *PurchaseInvoiceItemDelete {
+	mutation := newPurchaseInvoiceItemMutation(c.config, OpDelete)
+	return &PurchaseInvoiceItemDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *PurchaseInvoiceItemClient) DeleteOne(pii *PurchaseInvoiceItem) *PurchaseInvoiceItemDeleteOne {
+	return c.DeleteOneID(pii.ID)
+}
+
+// DeleteOne returns a builder for deleting the given entity by its id.
+func (c *PurchaseInvoiceItemClient) DeleteOneID(id int) *PurchaseInvoiceItemDeleteOne {
+	builder := c.Delete().Where(purchaseinvoiceitem.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PurchaseInvoiceItemDeleteOne{builder}
+}
+
+// Query returns a query builder for PurchaseInvoiceItem.
+func (c *PurchaseInvoiceItemClient) Query() *PurchaseInvoiceItemQuery {
+	return &PurchaseInvoiceItemQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a PurchaseInvoiceItem entity by its id.
+func (c *PurchaseInvoiceItemClient) Get(ctx context.Context, id int) (*PurchaseInvoiceItem, error) {
+	return c.Query().Where(purchaseinvoiceitem.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PurchaseInvoiceItemClient) GetX(ctx context.Context, id int) *PurchaseInvoiceItem {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *PurchaseInvoiceItemClient) Hooks() []Hook {
+	return c.hooks.PurchaseInvoiceItem
+}
+
+// SupplierClient is a client for the Supplier schema.
+type SupplierClient struct {
+	config
+}
+
+// NewSupplierClient returns a client for the Supplier from the given config.
+func NewSupplierClient(c config) *SupplierClient {
+	return &SupplierClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `supplier.Hooks(f(g(h())))`.
+func (c *SupplierClient) Use(hooks ...Hook) {
+	c.hooks.Supplier = append(c.hooks.Supplier, hooks...)
+}
+
+// Create returns a builder for creating a Supplier entity.
+func (c *SupplierClient) Create() *SupplierCreate {
+	mutation := newSupplierMutation(c.config, OpCreate)
+	return &SupplierCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Supplier entities.
+func (c *SupplierClient) CreateBulk(builders ...*SupplierCreate) *SupplierCreateBulk {
+	return &SupplierCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Supplier.
+func (c *SupplierClient) Update() *SupplierUpdate {
+	mutation := newSupplierMutation(c.config, OpUpdate)
+	return &SupplierUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SupplierClient) UpdateOne(s *Supplier) *SupplierUpdateOne {
+	mutation := newSupplierMutation(c.config, OpUpdateOne, withSupplier(s))
+	return &SupplierUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SupplierClient) UpdateOneID(id int) *SupplierUpdateOne {
+	mutation := newSupplierMutation(c.config, OpUpdateOne, withSupplierID(id))
+	return &SupplierUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Supplier.
+func (c *SupplierClient) Delete() *SupplierDelete {
+	mutation := newSupplierMutation(c.config, OpDelete)
+	return &SupplierDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SupplierClient) DeleteOne(s *Supplier) *SupplierDeleteOne {
+	return c.DeleteOneID(s.ID)
+}
+
+// DeleteOne returns a builder for deleting the given entity by its id.
+func (c *SupplierClient) DeleteOneID(id int) *SupplierDeleteOne {
+	builder := c.Delete().Where(supplier.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SupplierDeleteOne{builder}
+}
+
+// Query returns a query builder for Supplier.
+func (c *SupplierClient) Query() *SupplierQuery {
+	return &SupplierQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Supplier entity by its id.
+func (c *SupplierClient) Get(ctx context.Context, id int) (*Supplier, error) {
+	return c.Query().Where(supplier.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SupplierClient) GetX(ctx context.Context, id int) *Supplier {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryPurchaseInvoices queries the purchase_invoices edge of a Supplier.
+func (c *SupplierClient) QueryPurchaseInvoices(s *Supplier) *PurchaseInvoiceQuery {
+	query := &PurchaseInvoiceQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := s.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(supplier.Table, supplier.FieldID, id),
+			sqlgraph.To(purchaseinvoice.Table, purchaseinvoice.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, supplier.PurchaseInvoicesTable, supplier.PurchaseInvoicesColumn),
+		)
+		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *SupplierClient) Hooks() []Hook {
+	return c.hooks.Supplier
+}
+
+// SupplierPaymentClient is a client for the SupplierPayment schema.
+type SupplierPaymentClient struct {
+	config
+}
+
+// NewSupplierPaymentClient returns a client for the SupplierPayment from the given config.
+func NewSupplierPaymentClient(c config) *SupplierPaymentClient {
+	return &SupplierPaymentClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `supplierpayment.Hooks(f(g(h())))`.
+func (c *SupplierPaymentClient) Use(hooks ...Hook) {
+	c.hooks.SupplierPayment = append(c.hooks.SupplierPayment, hooks...)
+}
+
+// Create returns a builder for creating a SupplierPayment entity.
+func (c *SupplierPaymentClient) Create() *SupplierPaymentCreate {
+	mutation := newSupplierPaymentMutation(c.config, OpCreate)
+	return &SupplierPaymentCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of SupplierPayment entities.
+func (c *SupplierPaymentClient) CreateBulk(builders ...*SupplierPaymentCreate) *SupplierPaymentCreateBulk {
+	return &SupplierPaymentCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for SupplierPayment.
+func (c *SupplierPaymentClient) Update() *SupplierPaymentUpdate {
+	mutation := newSupplierPaymentMutation(c.config, OpUpdate)
+	return &SupplierPaymentUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SupplierPaymentClient) UpdateOne(sp *SupplierPayment) *SupplierPaymentUpdateOne {
+	mutation := newSupplierPaymentMutation(c.config, OpUpdateOne, withSupplierPayment(sp))
+	return &SupplierPaymentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SupplierPaymentClient) UpdateOneID(id int) *SupplierPaymentUpdateOne {
+	mutation := newSupplierPaymentMutation(c.config, OpUpdateOne, withSupplierPaymentID(id))
+	return &SupplierPaymentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for SupplierPayment.
+func (c *SupplierPaymentClient) Delete() *SupplierPaymentDelete {
+	mutation := newSupplierPaymentMutation(c.config, OpDelete)
+	return &SupplierPaymentDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SupplierPaymentClient) DeleteOne(sp *SupplierPayment) *SupplierPaymentDeleteOne {
+	return c.DeleteOneID(sp.ID)
+}
+
+// DeleteOne returns a builder for deleting the given entity by its id.
+func (c *SupplierPaymentClient) DeleteOneID(id int) *SupplierPaymentDeleteOne {
+	builder := c.Delete().Where(supplierpayment.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SupplierPaymentDeleteOne{builder}
+}
+
+// Query returns a query builder for SupplierPayment.
+func (c *SupplierPaymentClient) Query() *SupplierPaymentQuery {
+	return &SupplierPaymentQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a SupplierPayment entity by its id.
+func (c *SupplierPaymentClient) Get(ctx context.Context, id int) (*SupplierPayment, error) {
+	return c.Query().Where(supplierpayment.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SupplierPaymentClient) GetX(ctx context.Context, id int) *SupplierPayment {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *SupplierPaymentClient) Hooks() []Hook {
+	return c.hooks.SupplierPayment
 }
 
 // TenantClient is a client for the Tenant schema.

@@ -6,7 +6,11 @@ import (
 	"Veritasbackend/ent/invoice"
 	"Veritasbackend/ent/invoiceitem"
 	"Veritasbackend/ent/product"
+	"Veritasbackend/ent/purchaseinvoice"
+	"Veritasbackend/ent/purchaseinvoiceitem"
 	"Veritasbackend/ent/schema"
+	"Veritasbackend/ent/supplier"
+	"Veritasbackend/ent/supplierpayment"
 	"Veritasbackend/ent/tenant"
 	"Veritasbackend/ent/user"
 	"time"
@@ -60,22 +64,126 @@ func init() {
 	productDescPrice := productFields[2].Descriptor()
 	// product.PriceValidator is a validator for the "price" field. It is called by the builders before save.
 	product.PriceValidator = productDescPrice.Validators[0].(func(float64) error)
+	// productDescPurchasePrice is the schema descriptor for purchase_price field.
+	productDescPurchasePrice := productFields[3].Descriptor()
+	// product.DefaultPurchasePrice holds the default value on creation for the purchase_price field.
+	product.DefaultPurchasePrice = productDescPurchasePrice.Default.(float64)
+	// product.PurchasePriceValidator is a validator for the "purchase_price" field. It is called by the builders before save.
+	product.PurchasePriceValidator = productDescPurchasePrice.Validators[0].(func(float64) error)
+	// productDescRetailPrice is the schema descriptor for retail_price field.
+	productDescRetailPrice := productFields[4].Descriptor()
+	// product.DefaultRetailPrice holds the default value on creation for the retail_price field.
+	product.DefaultRetailPrice = productDescRetailPrice.Default.(float64)
+	// product.RetailPriceValidator is a validator for the "retail_price" field. It is called by the builders before save.
+	product.RetailPriceValidator = productDescRetailPrice.Validators[0].(func(float64) error)
+	// productDescWholesalePrice is the schema descriptor for wholesale_price field.
+	productDescWholesalePrice := productFields[5].Descriptor()
+	// product.WholesalePriceValidator is a validator for the "wholesale_price" field. It is called by the builders before save.
+	product.WholesalePriceValidator = productDescWholesalePrice.Validators[0].(func(float64) error)
+	// productDescMinWholesaleQuantity is the schema descriptor for min_wholesale_quantity field.
+	productDescMinWholesaleQuantity := productFields[6].Descriptor()
+	// product.MinWholesaleQuantityValidator is a validator for the "min_wholesale_quantity" field. It is called by the builders before save.
+	product.MinWholesaleQuantityValidator = productDescMinWholesaleQuantity.Validators[0].(func(int) error)
 	// productDescStock is the schema descriptor for stock field.
-	productDescStock := productFields[3].Descriptor()
+	productDescStock := productFields[7].Descriptor()
 	// product.DefaultStock holds the default value on creation for the stock field.
 	product.DefaultStock = productDescStock.Default.(int)
 	// product.StockValidator is a validator for the "stock" field. It is called by the builders before save.
 	product.StockValidator = productDescStock.Validators[0].(func(int) error)
 	// productDescCreatedAt is the schema descriptor for created_at field.
-	productDescCreatedAt := productFields[6].Descriptor()
+	productDescCreatedAt := productFields[10].Descriptor()
 	// product.DefaultCreatedAt holds the default value on creation for the created_at field.
 	product.DefaultCreatedAt = productDescCreatedAt.Default.(func() time.Time)
 	// productDescUpdatedAt is the schema descriptor for updated_at field.
-	productDescUpdatedAt := productFields[7].Descriptor()
+	productDescUpdatedAt := productFields[11].Descriptor()
 	// product.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	product.DefaultUpdatedAt = productDescUpdatedAt.Default.(func() time.Time)
 	// product.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	product.UpdateDefaultUpdatedAt = productDescUpdatedAt.UpdateDefault.(func() time.Time)
+	purchaseinvoiceFields := schema.PurchaseInvoice{}.Fields()
+	_ = purchaseinvoiceFields
+	// purchaseinvoiceDescInvoiceNumber is the schema descriptor for invoice_number field.
+	purchaseinvoiceDescInvoiceNumber := purchaseinvoiceFields[0].Descriptor()
+	// purchaseinvoice.InvoiceNumberValidator is a validator for the "invoice_number" field. It is called by the builders before save.
+	purchaseinvoice.InvoiceNumberValidator = purchaseinvoiceDescInvoiceNumber.Validators[0].(func(string) error)
+	// purchaseinvoiceDescTotal is the schema descriptor for total field.
+	purchaseinvoiceDescTotal := purchaseinvoiceFields[1].Descriptor()
+	// purchaseinvoice.TotalValidator is a validator for the "total" field. It is called by the builders before save.
+	purchaseinvoice.TotalValidator = purchaseinvoiceDescTotal.Validators[0].(func(float64) error)
+	// purchaseinvoiceDescStatus is the schema descriptor for status field.
+	purchaseinvoiceDescStatus := purchaseinvoiceFields[2].Descriptor()
+	// purchaseinvoice.DefaultStatus holds the default value on creation for the status field.
+	purchaseinvoice.DefaultStatus = purchaseinvoiceDescStatus.Default.(string)
+	// purchaseinvoiceDescPaidAmount is the schema descriptor for paid_amount field.
+	purchaseinvoiceDescPaidAmount := purchaseinvoiceFields[5].Descriptor()
+	// purchaseinvoice.DefaultPaidAmount holds the default value on creation for the paid_amount field.
+	purchaseinvoice.DefaultPaidAmount = purchaseinvoiceDescPaidAmount.Default.(float64)
+	// purchaseinvoice.PaidAmountValidator is a validator for the "paid_amount" field. It is called by the builders before save.
+	purchaseinvoice.PaidAmountValidator = purchaseinvoiceDescPaidAmount.Validators[0].(func(float64) error)
+	// purchaseinvoiceDescCreatedAt is the schema descriptor for created_at field.
+	purchaseinvoiceDescCreatedAt := purchaseinvoiceFields[9].Descriptor()
+	// purchaseinvoice.DefaultCreatedAt holds the default value on creation for the created_at field.
+	purchaseinvoice.DefaultCreatedAt = purchaseinvoiceDescCreatedAt.Default.(func() time.Time)
+	// purchaseinvoiceDescUpdatedAt is the schema descriptor for updated_at field.
+	purchaseinvoiceDescUpdatedAt := purchaseinvoiceFields[10].Descriptor()
+	// purchaseinvoice.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	purchaseinvoice.DefaultUpdatedAt = purchaseinvoiceDescUpdatedAt.Default.(func() time.Time)
+	// purchaseinvoice.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	purchaseinvoice.UpdateDefaultUpdatedAt = purchaseinvoiceDescUpdatedAt.UpdateDefault.(func() time.Time)
+	purchaseinvoiceitemFields := schema.PurchaseInvoiceItem{}.Fields()
+	_ = purchaseinvoiceitemFields
+	// purchaseinvoiceitemDescQuantity is the schema descriptor for quantity field.
+	purchaseinvoiceitemDescQuantity := purchaseinvoiceitemFields[2].Descriptor()
+	// purchaseinvoiceitem.QuantityValidator is a validator for the "quantity" field. It is called by the builders before save.
+	purchaseinvoiceitem.QuantityValidator = purchaseinvoiceitemDescQuantity.Validators[0].(func(int) error)
+	// purchaseinvoiceitemDescUnitCost is the schema descriptor for unit_cost field.
+	purchaseinvoiceitemDescUnitCost := purchaseinvoiceitemFields[3].Descriptor()
+	// purchaseinvoiceitem.UnitCostValidator is a validator for the "unit_cost" field. It is called by the builders before save.
+	purchaseinvoiceitem.UnitCostValidator = purchaseinvoiceitemDescUnitCost.Validators[0].(func(float64) error)
+	// purchaseinvoiceitemDescSubtotal is the schema descriptor for subtotal field.
+	purchaseinvoiceitemDescSubtotal := purchaseinvoiceitemFields[4].Descriptor()
+	// purchaseinvoiceitem.SubtotalValidator is a validator for the "subtotal" field. It is called by the builders before save.
+	purchaseinvoiceitem.SubtotalValidator = purchaseinvoiceitemDescSubtotal.Validators[0].(func(float64) error)
+	supplierFields := schema.Supplier{}.Fields()
+	_ = supplierFields
+	// supplierDescName is the schema descriptor for name field.
+	supplierDescName := supplierFields[0].Descriptor()
+	// supplier.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	supplier.NameValidator = supplierDescName.Validators[0].(func(string) error)
+	// supplierDescCreatedAt is the schema descriptor for created_at field.
+	supplierDescCreatedAt := supplierFields[6].Descriptor()
+	// supplier.DefaultCreatedAt holds the default value on creation for the created_at field.
+	supplier.DefaultCreatedAt = supplierDescCreatedAt.Default.(func() time.Time)
+	// supplierDescUpdatedAt is the schema descriptor for updated_at field.
+	supplierDescUpdatedAt := supplierFields[7].Descriptor()
+	// supplier.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	supplier.DefaultUpdatedAt = supplierDescUpdatedAt.Default.(func() time.Time)
+	// supplier.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	supplier.UpdateDefaultUpdatedAt = supplierDescUpdatedAt.UpdateDefault.(func() time.Time)
+	supplierpaymentFields := schema.SupplierPayment{}.Fields()
+	_ = supplierpaymentFields
+	// supplierpaymentDescAmount is the schema descriptor for amount field.
+	supplierpaymentDescAmount := supplierpaymentFields[2].Descriptor()
+	// supplierpayment.AmountValidator is a validator for the "amount" field. It is called by the builders before save.
+	supplierpayment.AmountValidator = supplierpaymentDescAmount.Validators[0].(func(float64) error)
+	// supplierpaymentDescPaymentDate is the schema descriptor for payment_date field.
+	supplierpaymentDescPaymentDate := supplierpaymentFields[3].Descriptor()
+	// supplierpayment.DefaultPaymentDate holds the default value on creation for the payment_date field.
+	supplierpayment.DefaultPaymentDate = supplierpaymentDescPaymentDate.Default.(func() time.Time)
+	// supplierpaymentDescPaymentMethod is the schema descriptor for payment_method field.
+	supplierpaymentDescPaymentMethod := supplierpaymentFields[4].Descriptor()
+	// supplierpayment.PaymentMethodValidator is a validator for the "payment_method" field. It is called by the builders before save.
+	supplierpayment.PaymentMethodValidator = supplierpaymentDescPaymentMethod.Validators[0].(func(string) error)
+	// supplierpaymentDescCreatedAt is the schema descriptor for created_at field.
+	supplierpaymentDescCreatedAt := supplierpaymentFields[9].Descriptor()
+	// supplierpayment.DefaultCreatedAt holds the default value on creation for the created_at field.
+	supplierpayment.DefaultCreatedAt = supplierpaymentDescCreatedAt.Default.(func() time.Time)
+	// supplierpaymentDescUpdatedAt is the schema descriptor for updated_at field.
+	supplierpaymentDescUpdatedAt := supplierpaymentFields[10].Descriptor()
+	// supplierpayment.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	supplierpayment.DefaultUpdatedAt = supplierpaymentDescUpdatedAt.Default.(func() time.Time)
+	// supplierpayment.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	supplierpayment.UpdateDefaultUpdatedAt = supplierpaymentDescUpdatedAt.UpdateDefault.(func() time.Time)
 	tenantFields := schema.Tenant{}.Fields()
 	_ = tenantFields
 	// tenantDescName is the schema descriptor for name field.

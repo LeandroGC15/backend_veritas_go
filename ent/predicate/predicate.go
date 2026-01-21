@@ -15,6 +15,18 @@ type InvoiceItem func(*sql.Selector)
 // Product is the predicate function for product builders.
 type Product func(*sql.Selector)
 
+// PurchaseInvoice is the predicate function for purchaseinvoice builders.
+type PurchaseInvoice func(*sql.Selector)
+
+// PurchaseInvoiceItem is the predicate function for purchaseinvoiceitem builders.
+type PurchaseInvoiceItem func(*sql.Selector)
+
+// Supplier is the predicate function for supplier builders.
+type Supplier func(*sql.Selector)
+
+// SupplierPayment is the predicate function for supplierpayment builders.
+type SupplierPayment func(*sql.Selector)
+
 // Tenant is the predicate function for tenant builders.
 type Tenant func(*sql.Selector)
 

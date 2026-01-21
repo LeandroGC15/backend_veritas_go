@@ -24,7 +24,23 @@ func (Product) Fields() []ent.Field {
 			Comment("Descripción del producto"),
 		field.Float("price").
 			Min(0).
-			Comment("Precio del producto"),
+			Comment("Precio del producto (legacy - usar retail_price)"),
+		field.Float("purchase_price").
+			Default(0).
+			Min(0).
+			Comment("Precio de compra al proveedor"),
+		field.Float("retail_price").
+			Default(0).
+			Min(0).
+			Comment("Precio de venta al detal"),
+		field.Float("wholesale_price").
+			Optional().
+			Min(0).
+			Comment("Precio de venta al mayor"),
+		field.Int("min_wholesale_quantity").
+			Optional().
+			Min(1).
+			Comment("Cantidad mínima para precio mayor"),
 		field.Int("stock").
 			Default(0).
 			Min(0).

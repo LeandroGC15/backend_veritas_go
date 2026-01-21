@@ -14,6 +14,7 @@ type ProductRepository interface {
 	Create(ctx context.Context, tenantID int, name, description, sku string, price float64, stock int) (*ent.Product, error)
 	Update(ctx context.Context, id int, name, description, sku string, price float64, stock int) (*ent.Product, error)
 	UpdateStock(ctx context.Context, id int, quantity int) error
+	AddStock(ctx context.Context, id int, quantity int) error
 	Delete(ctx context.Context, id int) error
 	CountByTenant(ctx context.Context, tenantID int) (int, error)
 }
@@ -100,6 +101,25 @@ func (r *productRepository) UpdateStock(ctx context.Context, id int, quantity in
 	if newStock < 0 {
 		return fmt.Errorf("stock insuficiente: disponible %d, solicitado %d", product.Stock, quantity)
 	}
+
+	_, err = r.client.Product.
+		UpdateOneID(id).
+		SetStock(newStock).
+		Save(ctx)
+
+	return err
+}
+
+func (r *productRepository) AddStock(ctx context.Context, id int, quantity int) error {
+	product, err := r.client.Product.
+		Query().
+		Where(product.IDEQ(id)).
+		Only(ctx)
+	if err != nil {
+		return err
+	}
+
+	newStock := product.Stock + quantity
 
 	_, err = r.client.Product.
 		UpdateOneID(id).

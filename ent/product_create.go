@@ -46,6 +46,62 @@ func (pc *ProductCreate) SetPrice(f float64) *ProductCreate {
 	return pc
 }
 
+// SetPurchasePrice sets the "purchase_price" field.
+func (pc *ProductCreate) SetPurchasePrice(f float64) *ProductCreate {
+	pc.mutation.SetPurchasePrice(f)
+	return pc
+}
+
+// SetNillablePurchasePrice sets the "purchase_price" field if the given value is not nil.
+func (pc *ProductCreate) SetNillablePurchasePrice(f *float64) *ProductCreate {
+	if f != nil {
+		pc.SetPurchasePrice(*f)
+	}
+	return pc
+}
+
+// SetRetailPrice sets the "retail_price" field.
+func (pc *ProductCreate) SetRetailPrice(f float64) *ProductCreate {
+	pc.mutation.SetRetailPrice(f)
+	return pc
+}
+
+// SetNillableRetailPrice sets the "retail_price" field if the given value is not nil.
+func (pc *ProductCreate) SetNillableRetailPrice(f *float64) *ProductCreate {
+	if f != nil {
+		pc.SetRetailPrice(*f)
+	}
+	return pc
+}
+
+// SetWholesalePrice sets the "wholesale_price" field.
+func (pc *ProductCreate) SetWholesalePrice(f float64) *ProductCreate {
+	pc.mutation.SetWholesalePrice(f)
+	return pc
+}
+
+// SetNillableWholesalePrice sets the "wholesale_price" field if the given value is not nil.
+func (pc *ProductCreate) SetNillableWholesalePrice(f *float64) *ProductCreate {
+	if f != nil {
+		pc.SetWholesalePrice(*f)
+	}
+	return pc
+}
+
+// SetMinWholesaleQuantity sets the "min_wholesale_quantity" field.
+func (pc *ProductCreate) SetMinWholesaleQuantity(i int) *ProductCreate {
+	pc.mutation.SetMinWholesaleQuantity(i)
+	return pc
+}
+
+// SetNillableMinWholesaleQuantity sets the "min_wholesale_quantity" field if the given value is not nil.
+func (pc *ProductCreate) SetNillableMinWholesaleQuantity(i *int) *ProductCreate {
+	if i != nil {
+		pc.SetMinWholesaleQuantity(*i)
+	}
+	return pc
+}
+
 // SetStock sets the "stock" field.
 func (pc *ProductCreate) SetStock(i int) *ProductCreate {
 	pc.mutation.SetStock(i)
@@ -185,6 +241,14 @@ func (pc *ProductCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (pc *ProductCreate) defaults() {
+	if _, ok := pc.mutation.PurchasePrice(); !ok {
+		v := product.DefaultPurchasePrice
+		pc.mutation.SetPurchasePrice(v)
+	}
+	if _, ok := pc.mutation.RetailPrice(); !ok {
+		v := product.DefaultRetailPrice
+		pc.mutation.SetRetailPrice(v)
+	}
 	if _, ok := pc.mutation.Stock(); !ok {
 		v := product.DefaultStock
 		pc.mutation.SetStock(v)
@@ -215,6 +279,32 @@ func (pc *ProductCreate) check() error {
 	if v, ok := pc.mutation.Price(); ok {
 		if err := product.PriceValidator(v); err != nil {
 			return &ValidationError{Name: "price", err: fmt.Errorf(`ent: validator failed for field "Product.price": %w`, err)}
+		}
+	}
+	if _, ok := pc.mutation.PurchasePrice(); !ok {
+		return &ValidationError{Name: "purchase_price", err: errors.New(`ent: missing required field "Product.purchase_price"`)}
+	}
+	if v, ok := pc.mutation.PurchasePrice(); ok {
+		if err := product.PurchasePriceValidator(v); err != nil {
+			return &ValidationError{Name: "purchase_price", err: fmt.Errorf(`ent: validator failed for field "Product.purchase_price": %w`, err)}
+		}
+	}
+	if _, ok := pc.mutation.RetailPrice(); !ok {
+		return &ValidationError{Name: "retail_price", err: errors.New(`ent: missing required field "Product.retail_price"`)}
+	}
+	if v, ok := pc.mutation.RetailPrice(); ok {
+		if err := product.RetailPriceValidator(v); err != nil {
+			return &ValidationError{Name: "retail_price", err: fmt.Errorf(`ent: validator failed for field "Product.retail_price": %w`, err)}
+		}
+	}
+	if v, ok := pc.mutation.WholesalePrice(); ok {
+		if err := product.WholesalePriceValidator(v); err != nil {
+			return &ValidationError{Name: "wholesale_price", err: fmt.Errorf(`ent: validator failed for field "Product.wholesale_price": %w`, err)}
+		}
+	}
+	if v, ok := pc.mutation.MinWholesaleQuantity(); ok {
+		if err := product.MinWholesaleQuantityValidator(v); err != nil {
+			return &ValidationError{Name: "min_wholesale_quantity", err: fmt.Errorf(`ent: validator failed for field "Product.min_wholesale_quantity": %w`, err)}
 		}
 	}
 	if _, ok := pc.mutation.Stock(); !ok {
@@ -284,6 +374,38 @@ func (pc *ProductCreate) createSpec() (*Product, *sqlgraph.CreateSpec) {
 			Column: product.FieldPrice,
 		})
 		_node.Price = value
+	}
+	if value, ok := pc.mutation.PurchasePrice(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: product.FieldPurchasePrice,
+		})
+		_node.PurchasePrice = value
+	}
+	if value, ok := pc.mutation.RetailPrice(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: product.FieldRetailPrice,
+		})
+		_node.RetailPrice = value
+	}
+	if value, ok := pc.mutation.WholesalePrice(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: product.FieldWholesalePrice,
+		})
+		_node.WholesalePrice = value
+	}
+	if value, ok := pc.mutation.MinWholesaleQuantity(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: product.FieldMinWholesaleQuantity,
+		})
+		_node.MinWholesaleQuantity = value
 	}
 	if value, ok := pc.mutation.Stock(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

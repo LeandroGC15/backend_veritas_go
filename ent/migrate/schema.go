@@ -82,6 +82,10 @@ var (
 		{Name: "name", Type: field.TypeString},
 		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "price", Type: field.TypeFloat64},
+		{Name: "purchase_price", Type: field.TypeFloat64, Default: 0},
+		{Name: "retail_price", Type: field.TypeFloat64, Default: 0},
+		{Name: "wholesale_price", Type: field.TypeFloat64, Nullable: true},
+		{Name: "min_wholesale_quantity", Type: field.TypeInt, Nullable: true},
 		{Name: "stock", Type: field.TypeInt, Default: 0},
 		{Name: "sku", Type: field.TypeString, Nullable: true},
 		{Name: "tenant_id", Type: field.TypeInt},
@@ -97,12 +101,168 @@ var (
 			{
 				Name:    "product_tenant_id",
 				Unique:  false,
-				Columns: []*schema.Column{ProductsColumns[6]},
+				Columns: []*schema.Column{ProductsColumns[10]},
 			},
 			{
 				Name:    "product_sku",
 				Unique:  false,
-				Columns: []*schema.Column{ProductsColumns[5]},
+				Columns: []*schema.Column{ProductsColumns[9]},
+			},
+		},
+	}
+	// PurchaseInvoicesColumns holds the columns for the "purchase_invoices" table.
+	PurchaseInvoicesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "invoice_number", Type: field.TypeString},
+		{Name: "total", Type: field.TypeFloat64},
+		{Name: "status", Type: field.TypeString, Default: "pending"},
+		{Name: "payment_method", Type: field.TypeString, Nullable: true},
+		{Name: "due_date", Type: field.TypeTime, Nullable: true},
+		{Name: "paid_amount", Type: field.TypeFloat64, Default: 0},
+		{Name: "tenant_id", Type: field.TypeInt},
+		{Name: "user_id", Type: field.TypeInt},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "supplier_id", Type: field.TypeInt},
+	}
+	// PurchaseInvoicesTable holds the schema information for the "purchase_invoices" table.
+	PurchaseInvoicesTable = &schema.Table{
+		Name:       "purchase_invoices",
+		Columns:    PurchaseInvoicesColumns,
+		PrimaryKey: []*schema.Column{PurchaseInvoicesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "purchase_invoices_suppliers_supplier",
+				Columns:    []*schema.Column{PurchaseInvoicesColumns[11]},
+				RefColumns: []*schema.Column{SuppliersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "purchaseinvoice_tenant_id",
+				Unique:  false,
+				Columns: []*schema.Column{PurchaseInvoicesColumns[7]},
+			},
+			{
+				Name:    "purchaseinvoice_supplier_id",
+				Unique:  false,
+				Columns: []*schema.Column{PurchaseInvoicesColumns[11]},
+			},
+			{
+				Name:    "purchaseinvoice_status",
+				Unique:  false,
+				Columns: []*schema.Column{PurchaseInvoicesColumns[3]},
+			},
+			{
+				Name:    "purchaseinvoice_due_date",
+				Unique:  false,
+				Columns: []*schema.Column{PurchaseInvoicesColumns[5]},
+			},
+			{
+				Name:    "purchaseinvoice_invoice_number",
+				Unique:  true,
+				Columns: []*schema.Column{PurchaseInvoicesColumns[1]},
+			},
+		},
+	}
+	// PurchaseInvoiceItemsColumns holds the columns for the "purchase_invoice_items" table.
+	PurchaseInvoiceItemsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "purchase_invoice_id", Type: field.TypeInt},
+		{Name: "product_id", Type: field.TypeInt},
+		{Name: "quantity", Type: field.TypeInt},
+		{Name: "unit_cost", Type: field.TypeFloat64},
+		{Name: "subtotal", Type: field.TypeFloat64},
+	}
+	// PurchaseInvoiceItemsTable holds the schema information for the "purchase_invoice_items" table.
+	PurchaseInvoiceItemsTable = &schema.Table{
+		Name:       "purchase_invoice_items",
+		Columns:    PurchaseInvoiceItemsColumns,
+		PrimaryKey: []*schema.Column{PurchaseInvoiceItemsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "purchaseinvoiceitem_purchase_invoice_id",
+				Unique:  false,
+				Columns: []*schema.Column{PurchaseInvoiceItemsColumns[1]},
+			},
+			{
+				Name:    "purchaseinvoiceitem_product_id",
+				Unique:  false,
+				Columns: []*schema.Column{PurchaseInvoiceItemsColumns[2]},
+			},
+		},
+	}
+	// SuppliersColumns holds the columns for the "suppliers" table.
+	SuppliersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "email", Type: field.TypeString, Nullable: true},
+		{Name: "phone", Type: field.TypeString, Nullable: true},
+		{Name: "address", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "ruc_nit", Type: field.TypeString, Nullable: true},
+		{Name: "tenant_id", Type: field.TypeInt},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// SuppliersTable holds the schema information for the "suppliers" table.
+	SuppliersTable = &schema.Table{
+		Name:       "suppliers",
+		Columns:    SuppliersColumns,
+		PrimaryKey: []*schema.Column{SuppliersColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "supplier_tenant_id",
+				Unique:  false,
+				Columns: []*schema.Column{SuppliersColumns[6]},
+			},
+			{
+				Name:    "supplier_ruc_nit",
+				Unique:  true,
+				Columns: []*schema.Column{SuppliersColumns[5]},
+			},
+		},
+	}
+	// SupplierPaymentsColumns holds the columns for the "supplier_payments" table.
+	SupplierPaymentsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "purchase_invoice_id", Type: field.TypeInt},
+		{Name: "supplier_id", Type: field.TypeInt},
+		{Name: "amount", Type: field.TypeFloat64},
+		{Name: "payment_date", Type: field.TypeTime},
+		{Name: "payment_method", Type: field.TypeString},
+		{Name: "reference", Type: field.TypeString, Nullable: true},
+		{Name: "notes", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "tenant_id", Type: field.TypeInt},
+		{Name: "user_id", Type: field.TypeInt},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// SupplierPaymentsTable holds the schema information for the "supplier_payments" table.
+	SupplierPaymentsTable = &schema.Table{
+		Name:       "supplier_payments",
+		Columns:    SupplierPaymentsColumns,
+		PrimaryKey: []*schema.Column{SupplierPaymentsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "supplierpayment_tenant_id",
+				Unique:  false,
+				Columns: []*schema.Column{SupplierPaymentsColumns[8]},
+			},
+			{
+				Name:    "supplierpayment_supplier_id",
+				Unique:  false,
+				Columns: []*schema.Column{SupplierPaymentsColumns[2]},
+			},
+			{
+				Name:    "supplierpayment_purchase_invoice_id",
+				Unique:  false,
+				Columns: []*schema.Column{SupplierPaymentsColumns[1]},
+			},
+			{
+				Name:    "supplierpayment_payment_date",
+				Unique:  false,
+				Columns: []*schema.Column{SupplierPaymentsColumns[4]},
 			},
 		},
 	}
@@ -162,6 +322,10 @@ var (
 		InvoicesTable,
 		InvoiceItemsTable,
 		ProductsTable,
+		PurchaseInvoicesTable,
+		PurchaseInvoiceItemsTable,
+		SuppliersTable,
+		SupplierPaymentsTable,
 		TenantsTable,
 		UsersTable,
 	}
@@ -169,4 +333,5 @@ var (
 
 func init() {
 	InvoiceItemsTable.ForeignKeys[0].RefTable = InvoicesTable
+	PurchaseInvoicesTable.ForeignKeys[0].RefTable = SuppliersTable
 }

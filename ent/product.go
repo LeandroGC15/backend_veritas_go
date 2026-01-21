@@ -20,8 +20,16 @@ type Product struct {
 	Name string `json:"name,omitempty"`
 	// Descripción del producto
 	Description string `json:"description,omitempty"`
-	// Precio del producto
+	// Precio del producto (legacy - usar retail_price)
 	Price float64 `json:"price,omitempty"`
+	// Precio de compra al proveedor
+	PurchasePrice float64 `json:"purchase_price,omitempty"`
+	// Precio de venta al detal
+	RetailPrice float64 `json:"retail_price,omitempty"`
+	// Precio de venta al mayor
+	WholesalePrice float64 `json:"wholesale_price,omitempty"`
+	// Cantidad mínima para precio mayor
+	MinWholesaleQuantity int `json:"min_wholesale_quantity,omitempty"`
 	// Cantidad en stock
 	Stock int `json:"stock,omitempty"`
 	// SKU del producto
@@ -39,9 +47,9 @@ func (*Product) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case product.FieldPrice:
+		case product.FieldPrice, product.FieldPurchasePrice, product.FieldRetailPrice, product.FieldWholesalePrice:
 			values[i] = new(sql.NullFloat64)
-		case product.FieldID, product.FieldStock, product.FieldTenantID:
+		case product.FieldID, product.FieldMinWholesaleQuantity, product.FieldStock, product.FieldTenantID:
 			values[i] = new(sql.NullInt64)
 		case product.FieldName, product.FieldDescription, product.FieldSku:
 			values[i] = new(sql.NullString)
@@ -85,6 +93,30 @@ func (pr *Product) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field price", values[i])
 			} else if value.Valid {
 				pr.Price = value.Float64
+			}
+		case product.FieldPurchasePrice:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field purchase_price", values[i])
+			} else if value.Valid {
+				pr.PurchasePrice = value.Float64
+			}
+		case product.FieldRetailPrice:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field retail_price", values[i])
+			} else if value.Valid {
+				pr.RetailPrice = value.Float64
+			}
+		case product.FieldWholesalePrice:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field wholesale_price", values[i])
+			} else if value.Valid {
+				pr.WholesalePrice = value.Float64
+			}
+		case product.FieldMinWholesaleQuantity:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field min_wholesale_quantity", values[i])
+			} else if value.Valid {
+				pr.MinWholesaleQuantity = int(value.Int64)
 			}
 		case product.FieldStock:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -152,6 +184,18 @@ func (pr *Product) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("price=")
 	builder.WriteString(fmt.Sprintf("%v", pr.Price))
+	builder.WriteString(", ")
+	builder.WriteString("purchase_price=")
+	builder.WriteString(fmt.Sprintf("%v", pr.PurchasePrice))
+	builder.WriteString(", ")
+	builder.WriteString("retail_price=")
+	builder.WriteString(fmt.Sprintf("%v", pr.RetailPrice))
+	builder.WriteString(", ")
+	builder.WriteString("wholesale_price=")
+	builder.WriteString(fmt.Sprintf("%v", pr.WholesalePrice))
+	builder.WriteString(", ")
+	builder.WriteString("min_wholesale_quantity=")
+	builder.WriteString(fmt.Sprintf("%v", pr.MinWholesaleQuantity))
 	builder.WriteString(", ")
 	builder.WriteString("stock=")
 	builder.WriteString(fmt.Sprintf("%v", pr.Stock))

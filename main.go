@@ -11,7 +11,9 @@ import (
 	"Veritasbackend/internal/usecase/auth"
 	"Veritasbackend/internal/usecase/dashboard"
 	"Veritasbackend/internal/usecase/invoice"
+	"Veritasbackend/internal/usecase/purchase"
 	"Veritasbackend/internal/usecase/stock"
+	"Veritasbackend/internal/usecase/supplier"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -37,6 +39,9 @@ func main() {
 	tenantRepo := repositories.NewTenantRepository(dbClient)
 	productRepo := repositories.NewProductRepository(dbClient)
 	invoiceRepo := repositories.NewInvoiceRepository(dbClient)
+	supplierRepo := repositories.NewSupplierRepository(dbClient)
+	purchaseInvoiceRepo := repositories.NewPurchaseInvoiceRepository(dbClient)
+	purchaseInvoiceItemRepo := repositories.NewPurchaseInvoiceItemRepository(dbClient)
 
 	// Inicializar casos de uso
 	loginUseCase := auth.NewLoginUseCase(userRepo, tenantRepo)
@@ -54,6 +59,14 @@ func main() {
 	getInvoiceUseCase := invoice.NewGetInvoiceUseCase(invoiceRepo, productRepo)
 	searchProductsUseCase := invoice.NewSearchProductsUseCase(invoiceRepo)
 
+	// Supplier use cases
+	createSupplierUseCase := supplier.NewCreateSupplierUseCase(supplierRepo)
+	listSuppliersUseCase := supplier.NewListSuppliersUseCase(supplierRepo)
+	updateSupplierUseCase := supplier.NewUpdateSupplierUseCase(supplierRepo)
+
+	// Purchase use cases
+	createPurchaseUseCase := purchase.NewCreatePurchaseUseCase(purchaseInvoiceRepo, purchaseInvoiceItemRepo, productRepo)
+
 	// Inicializar handlers
 	authHandler := handler.NewAuthHandler(loginUseCase, getCurrentUserUseCase, createUserUseCase)
 	dashboardHandler := handler.NewDashboardHandler(getMetricsUseCase, getReportsUseCase)
@@ -70,6 +83,11 @@ func main() {
 		getInvoiceUseCase,
 		searchProductsUseCase,
 	)
+	log.Println("🔧 Inicializando handler de supplier...")
+	supplierHandler := handler.NewSupplierHandler(createSupplierUseCase, listSuppliersUseCase, updateSupplierUseCase)
+
+	log.Println("🔧 Inicializando handler de purchase...")
+	purchaseHandler := handler.NewPurchaseHandler(createPurchaseUseCase)
 
 	// Configurar Gin
 	if cfg.Server.GinMode == "release" {
@@ -124,6 +142,14 @@ func main() {
 		protected.GET("/invoices", invoiceHandler.ListInvoices)
 		protected.GET("/invoices/:id", invoiceHandler.GetInvoice)
 		protected.GET("/invoices/products/search", invoiceHandler.SearchProducts)
+
+		// Suppliers
+		protected.POST("/suppliers", supplierHandler.CreateSupplier)
+		protected.GET("/suppliers", supplierHandler.ListSuppliers)
+		protected.PUT("/suppliers/:id", supplierHandler.UpdateSupplier)
+
+		// Purchases
+		protected.POST("/purchases", purchaseHandler.CreatePurchase)
 	}
 
 	// Log de todas las rutas registradas para debugging
@@ -139,6 +165,10 @@ func main() {
 	log.Println("  - GET /api/invoices (protegida)")
 	log.Println("  - GET /api/invoices/:id (protegida)")
 	log.Println("  - GET /api/invoices/products/search (protegida)")
+	log.Println("  - POST /api/suppliers (protegida)")
+	log.Println("  - GET /api/suppliers (protegida)")
+	log.Println("  - PUT /api/suppliers/:id (protegida)")
+	log.Println("  - POST /api/purchases (protegida)")
 	
 	log.Printf("🚀 Server starting on port %s", cfg.Server.Port)
 	if err := r.Run(":" + cfg.Server.Port); err != nil {

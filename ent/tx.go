@@ -18,6 +18,14 @@ type Tx struct {
 	InvoiceItem *InvoiceItemClient
 	// Product is the client for interacting with the Product builders.
 	Product *ProductClient
+	// PurchaseInvoice is the client for interacting with the PurchaseInvoice builders.
+	PurchaseInvoice *PurchaseInvoiceClient
+	// PurchaseInvoiceItem is the client for interacting with the PurchaseInvoiceItem builders.
+	PurchaseInvoiceItem *PurchaseInvoiceItemClient
+	// Supplier is the client for interacting with the Supplier builders.
+	Supplier *SupplierClient
+	// SupplierPayment is the client for interacting with the SupplierPayment builders.
+	SupplierPayment *SupplierPaymentClient
 	// Tenant is the client for interacting with the Tenant builders.
 	Tenant *TenantClient
 	// User is the client for interacting with the User builders.
@@ -160,6 +168,10 @@ func (tx *Tx) init() {
 	tx.Invoice = NewInvoiceClient(tx.config)
 	tx.InvoiceItem = NewInvoiceItemClient(tx.config)
 	tx.Product = NewProductClient(tx.config)
+	tx.PurchaseInvoice = NewPurchaseInvoiceClient(tx.config)
+	tx.PurchaseInvoiceItem = NewPurchaseInvoiceItemClient(tx.config)
+	tx.Supplier = NewSupplierClient(tx.config)
+	tx.SupplierPayment = NewSupplierPaymentClient(tx.config)
 	tx.Tenant = NewTenantClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 }

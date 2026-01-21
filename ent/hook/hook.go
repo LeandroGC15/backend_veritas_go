@@ -47,6 +47,58 @@ func (f ProductFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, err
 	return f(ctx, mv)
 }
 
+// The PurchaseInvoiceFunc type is an adapter to allow the use of ordinary
+// function as PurchaseInvoice mutator.
+type PurchaseInvoiceFunc func(context.Context, *ent.PurchaseInvoiceMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PurchaseInvoiceFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.PurchaseInvoiceMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PurchaseInvoiceMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The PurchaseInvoiceItemFunc type is an adapter to allow the use of ordinary
+// function as PurchaseInvoiceItem mutator.
+type PurchaseInvoiceItemFunc func(context.Context, *ent.PurchaseInvoiceItemMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PurchaseInvoiceItemFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.PurchaseInvoiceItemMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PurchaseInvoiceItemMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The SupplierFunc type is an adapter to allow the use of ordinary
+// function as Supplier mutator.
+type SupplierFunc func(context.Context, *ent.SupplierMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SupplierFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.SupplierMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SupplierMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The SupplierPaymentFunc type is an adapter to allow the use of ordinary
+// function as SupplierPayment mutator.
+type SupplierPaymentFunc func(context.Context, *ent.SupplierPaymentMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SupplierPaymentFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.SupplierPaymentMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SupplierPaymentMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The TenantFunc type is an adapter to allow the use of ordinary
 // function as Tenant mutator.
 type TenantFunc func(context.Context, *ent.TenantMutation) (ent.Value, error)

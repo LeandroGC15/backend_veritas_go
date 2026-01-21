@@ -17,6 +17,14 @@ const (
 	FieldDescription = "description"
 	// FieldPrice holds the string denoting the price field in the database.
 	FieldPrice = "price"
+	// FieldPurchasePrice holds the string denoting the purchase_price field in the database.
+	FieldPurchasePrice = "purchase_price"
+	// FieldRetailPrice holds the string denoting the retail_price field in the database.
+	FieldRetailPrice = "retail_price"
+	// FieldWholesalePrice holds the string denoting the wholesale_price field in the database.
+	FieldWholesalePrice = "wholesale_price"
+	// FieldMinWholesaleQuantity holds the string denoting the min_wholesale_quantity field in the database.
+	FieldMinWholesaleQuantity = "min_wholesale_quantity"
 	// FieldStock holds the string denoting the stock field in the database.
 	FieldStock = "stock"
 	// FieldSku holds the string denoting the sku field in the database.
@@ -37,6 +45,10 @@ var Columns = []string{
 	FieldName,
 	FieldDescription,
 	FieldPrice,
+	FieldPurchasePrice,
+	FieldRetailPrice,
+	FieldWholesalePrice,
+	FieldMinWholesaleQuantity,
 	FieldStock,
 	FieldSku,
 	FieldTenantID,
@@ -59,6 +71,18 @@ var (
 	NameValidator func(string) error
 	// PriceValidator is a validator for the "price" field. It is called by the builders before save.
 	PriceValidator func(float64) error
+	// DefaultPurchasePrice holds the default value on creation for the "purchase_price" field.
+	DefaultPurchasePrice float64
+	// PurchasePriceValidator is a validator for the "purchase_price" field. It is called by the builders before save.
+	PurchasePriceValidator func(float64) error
+	// DefaultRetailPrice holds the default value on creation for the "retail_price" field.
+	DefaultRetailPrice float64
+	// RetailPriceValidator is a validator for the "retail_price" field. It is called by the builders before save.
+	RetailPriceValidator func(float64) error
+	// WholesalePriceValidator is a validator for the "wholesale_price" field. It is called by the builders before save.
+	WholesalePriceValidator func(float64) error
+	// MinWholesaleQuantityValidator is a validator for the "min_wholesale_quantity" field. It is called by the builders before save.
+	MinWholesaleQuantityValidator func(int) error
 	// DefaultStock holds the default value on creation for the "stock" field.
 	DefaultStock int
 	// StockValidator is a validator for the "stock" field. It is called by the builders before save.

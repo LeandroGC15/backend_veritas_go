@@ -67,6 +67,102 @@ func (pu *ProductUpdate) AddPrice(f float64) *ProductUpdate {
 	return pu
 }
 
+// SetPurchasePrice sets the "purchase_price" field.
+func (pu *ProductUpdate) SetPurchasePrice(f float64) *ProductUpdate {
+	pu.mutation.ResetPurchasePrice()
+	pu.mutation.SetPurchasePrice(f)
+	return pu
+}
+
+// SetNillablePurchasePrice sets the "purchase_price" field if the given value is not nil.
+func (pu *ProductUpdate) SetNillablePurchasePrice(f *float64) *ProductUpdate {
+	if f != nil {
+		pu.SetPurchasePrice(*f)
+	}
+	return pu
+}
+
+// AddPurchasePrice adds f to the "purchase_price" field.
+func (pu *ProductUpdate) AddPurchasePrice(f float64) *ProductUpdate {
+	pu.mutation.AddPurchasePrice(f)
+	return pu
+}
+
+// SetRetailPrice sets the "retail_price" field.
+func (pu *ProductUpdate) SetRetailPrice(f float64) *ProductUpdate {
+	pu.mutation.ResetRetailPrice()
+	pu.mutation.SetRetailPrice(f)
+	return pu
+}
+
+// SetNillableRetailPrice sets the "retail_price" field if the given value is not nil.
+func (pu *ProductUpdate) SetNillableRetailPrice(f *float64) *ProductUpdate {
+	if f != nil {
+		pu.SetRetailPrice(*f)
+	}
+	return pu
+}
+
+// AddRetailPrice adds f to the "retail_price" field.
+func (pu *ProductUpdate) AddRetailPrice(f float64) *ProductUpdate {
+	pu.mutation.AddRetailPrice(f)
+	return pu
+}
+
+// SetWholesalePrice sets the "wholesale_price" field.
+func (pu *ProductUpdate) SetWholesalePrice(f float64) *ProductUpdate {
+	pu.mutation.ResetWholesalePrice()
+	pu.mutation.SetWholesalePrice(f)
+	return pu
+}
+
+// SetNillableWholesalePrice sets the "wholesale_price" field if the given value is not nil.
+func (pu *ProductUpdate) SetNillableWholesalePrice(f *float64) *ProductUpdate {
+	if f != nil {
+		pu.SetWholesalePrice(*f)
+	}
+	return pu
+}
+
+// AddWholesalePrice adds f to the "wholesale_price" field.
+func (pu *ProductUpdate) AddWholesalePrice(f float64) *ProductUpdate {
+	pu.mutation.AddWholesalePrice(f)
+	return pu
+}
+
+// ClearWholesalePrice clears the value of the "wholesale_price" field.
+func (pu *ProductUpdate) ClearWholesalePrice() *ProductUpdate {
+	pu.mutation.ClearWholesalePrice()
+	return pu
+}
+
+// SetMinWholesaleQuantity sets the "min_wholesale_quantity" field.
+func (pu *ProductUpdate) SetMinWholesaleQuantity(i int) *ProductUpdate {
+	pu.mutation.ResetMinWholesaleQuantity()
+	pu.mutation.SetMinWholesaleQuantity(i)
+	return pu
+}
+
+// SetNillableMinWholesaleQuantity sets the "min_wholesale_quantity" field if the given value is not nil.
+func (pu *ProductUpdate) SetNillableMinWholesaleQuantity(i *int) *ProductUpdate {
+	if i != nil {
+		pu.SetMinWholesaleQuantity(*i)
+	}
+	return pu
+}
+
+// AddMinWholesaleQuantity adds i to the "min_wholesale_quantity" field.
+func (pu *ProductUpdate) AddMinWholesaleQuantity(i int) *ProductUpdate {
+	pu.mutation.AddMinWholesaleQuantity(i)
+	return pu
+}
+
+// ClearMinWholesaleQuantity clears the value of the "min_wholesale_quantity" field.
+func (pu *ProductUpdate) ClearMinWholesaleQuantity() *ProductUpdate {
+	pu.mutation.ClearMinWholesaleQuantity()
+	return pu
+}
+
 // SetStock sets the "stock" field.
 func (pu *ProductUpdate) SetStock(i int) *ProductUpdate {
 	pu.mutation.ResetStock()
@@ -213,6 +309,26 @@ func (pu *ProductUpdate) check() error {
 			return &ValidationError{Name: "price", err: fmt.Errorf(`ent: validator failed for field "Product.price": %w`, err)}
 		}
 	}
+	if v, ok := pu.mutation.PurchasePrice(); ok {
+		if err := product.PurchasePriceValidator(v); err != nil {
+			return &ValidationError{Name: "purchase_price", err: fmt.Errorf(`ent: validator failed for field "Product.purchase_price": %w`, err)}
+		}
+	}
+	if v, ok := pu.mutation.RetailPrice(); ok {
+		if err := product.RetailPriceValidator(v); err != nil {
+			return &ValidationError{Name: "retail_price", err: fmt.Errorf(`ent: validator failed for field "Product.retail_price": %w`, err)}
+		}
+	}
+	if v, ok := pu.mutation.WholesalePrice(); ok {
+		if err := product.WholesalePriceValidator(v); err != nil {
+			return &ValidationError{Name: "wholesale_price", err: fmt.Errorf(`ent: validator failed for field "Product.wholesale_price": %w`, err)}
+		}
+	}
+	if v, ok := pu.mutation.MinWholesaleQuantity(); ok {
+		if err := product.MinWholesaleQuantityValidator(v); err != nil {
+			return &ValidationError{Name: "min_wholesale_quantity", err: fmt.Errorf(`ent: validator failed for field "Product.min_wholesale_quantity": %w`, err)}
+		}
+	}
 	if v, ok := pu.mutation.Stock(); ok {
 		if err := product.StockValidator(v); err != nil {
 			return &ValidationError{Name: "stock", err: fmt.Errorf(`ent: validator failed for field "Product.stock": %w`, err)}
@@ -271,6 +387,74 @@ func (pu *ProductUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Type:   field.TypeFloat64,
 			Value:  value,
 			Column: product.FieldPrice,
+		})
+	}
+	if value, ok := pu.mutation.PurchasePrice(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: product.FieldPurchasePrice,
+		})
+	}
+	if value, ok := pu.mutation.AddedPurchasePrice(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: product.FieldPurchasePrice,
+		})
+	}
+	if value, ok := pu.mutation.RetailPrice(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: product.FieldRetailPrice,
+		})
+	}
+	if value, ok := pu.mutation.AddedRetailPrice(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: product.FieldRetailPrice,
+		})
+	}
+	if value, ok := pu.mutation.WholesalePrice(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: product.FieldWholesalePrice,
+		})
+	}
+	if value, ok := pu.mutation.AddedWholesalePrice(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: product.FieldWholesalePrice,
+		})
+	}
+	if pu.mutation.WholesalePriceCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Column: product.FieldWholesalePrice,
+		})
+	}
+	if value, ok := pu.mutation.MinWholesaleQuantity(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: product.FieldMinWholesaleQuantity,
+		})
+	}
+	if value, ok := pu.mutation.AddedMinWholesaleQuantity(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: product.FieldMinWholesaleQuantity,
+		})
+	}
+	if pu.mutation.MinWholesaleQuantityCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: product.FieldMinWholesaleQuantity,
 		})
 	}
 	if value, ok := pu.mutation.Stock(); ok {
@@ -376,6 +560,102 @@ func (puo *ProductUpdateOne) SetPrice(f float64) *ProductUpdateOne {
 // AddPrice adds f to the "price" field.
 func (puo *ProductUpdateOne) AddPrice(f float64) *ProductUpdateOne {
 	puo.mutation.AddPrice(f)
+	return puo
+}
+
+// SetPurchasePrice sets the "purchase_price" field.
+func (puo *ProductUpdateOne) SetPurchasePrice(f float64) *ProductUpdateOne {
+	puo.mutation.ResetPurchasePrice()
+	puo.mutation.SetPurchasePrice(f)
+	return puo
+}
+
+// SetNillablePurchasePrice sets the "purchase_price" field if the given value is not nil.
+func (puo *ProductUpdateOne) SetNillablePurchasePrice(f *float64) *ProductUpdateOne {
+	if f != nil {
+		puo.SetPurchasePrice(*f)
+	}
+	return puo
+}
+
+// AddPurchasePrice adds f to the "purchase_price" field.
+func (puo *ProductUpdateOne) AddPurchasePrice(f float64) *ProductUpdateOne {
+	puo.mutation.AddPurchasePrice(f)
+	return puo
+}
+
+// SetRetailPrice sets the "retail_price" field.
+func (puo *ProductUpdateOne) SetRetailPrice(f float64) *ProductUpdateOne {
+	puo.mutation.ResetRetailPrice()
+	puo.mutation.SetRetailPrice(f)
+	return puo
+}
+
+// SetNillableRetailPrice sets the "retail_price" field if the given value is not nil.
+func (puo *ProductUpdateOne) SetNillableRetailPrice(f *float64) *ProductUpdateOne {
+	if f != nil {
+		puo.SetRetailPrice(*f)
+	}
+	return puo
+}
+
+// AddRetailPrice adds f to the "retail_price" field.
+func (puo *ProductUpdateOne) AddRetailPrice(f float64) *ProductUpdateOne {
+	puo.mutation.AddRetailPrice(f)
+	return puo
+}
+
+// SetWholesalePrice sets the "wholesale_price" field.
+func (puo *ProductUpdateOne) SetWholesalePrice(f float64) *ProductUpdateOne {
+	puo.mutation.ResetWholesalePrice()
+	puo.mutation.SetWholesalePrice(f)
+	return puo
+}
+
+// SetNillableWholesalePrice sets the "wholesale_price" field if the given value is not nil.
+func (puo *ProductUpdateOne) SetNillableWholesalePrice(f *float64) *ProductUpdateOne {
+	if f != nil {
+		puo.SetWholesalePrice(*f)
+	}
+	return puo
+}
+
+// AddWholesalePrice adds f to the "wholesale_price" field.
+func (puo *ProductUpdateOne) AddWholesalePrice(f float64) *ProductUpdateOne {
+	puo.mutation.AddWholesalePrice(f)
+	return puo
+}
+
+// ClearWholesalePrice clears the value of the "wholesale_price" field.
+func (puo *ProductUpdateOne) ClearWholesalePrice() *ProductUpdateOne {
+	puo.mutation.ClearWholesalePrice()
+	return puo
+}
+
+// SetMinWholesaleQuantity sets the "min_wholesale_quantity" field.
+func (puo *ProductUpdateOne) SetMinWholesaleQuantity(i int) *ProductUpdateOne {
+	puo.mutation.ResetMinWholesaleQuantity()
+	puo.mutation.SetMinWholesaleQuantity(i)
+	return puo
+}
+
+// SetNillableMinWholesaleQuantity sets the "min_wholesale_quantity" field if the given value is not nil.
+func (puo *ProductUpdateOne) SetNillableMinWholesaleQuantity(i *int) *ProductUpdateOne {
+	if i != nil {
+		puo.SetMinWholesaleQuantity(*i)
+	}
+	return puo
+}
+
+// AddMinWholesaleQuantity adds i to the "min_wholesale_quantity" field.
+func (puo *ProductUpdateOne) AddMinWholesaleQuantity(i int) *ProductUpdateOne {
+	puo.mutation.AddMinWholesaleQuantity(i)
+	return puo
+}
+
+// ClearMinWholesaleQuantity clears the value of the "min_wholesale_quantity" field.
+func (puo *ProductUpdateOne) ClearMinWholesaleQuantity() *ProductUpdateOne {
+	puo.mutation.ClearMinWholesaleQuantity()
 	return puo
 }
 
@@ -538,6 +818,26 @@ func (puo *ProductUpdateOne) check() error {
 			return &ValidationError{Name: "price", err: fmt.Errorf(`ent: validator failed for field "Product.price": %w`, err)}
 		}
 	}
+	if v, ok := puo.mutation.PurchasePrice(); ok {
+		if err := product.PurchasePriceValidator(v); err != nil {
+			return &ValidationError{Name: "purchase_price", err: fmt.Errorf(`ent: validator failed for field "Product.purchase_price": %w`, err)}
+		}
+	}
+	if v, ok := puo.mutation.RetailPrice(); ok {
+		if err := product.RetailPriceValidator(v); err != nil {
+			return &ValidationError{Name: "retail_price", err: fmt.Errorf(`ent: validator failed for field "Product.retail_price": %w`, err)}
+		}
+	}
+	if v, ok := puo.mutation.WholesalePrice(); ok {
+		if err := product.WholesalePriceValidator(v); err != nil {
+			return &ValidationError{Name: "wholesale_price", err: fmt.Errorf(`ent: validator failed for field "Product.wholesale_price": %w`, err)}
+		}
+	}
+	if v, ok := puo.mutation.MinWholesaleQuantity(); ok {
+		if err := product.MinWholesaleQuantityValidator(v); err != nil {
+			return &ValidationError{Name: "min_wholesale_quantity", err: fmt.Errorf(`ent: validator failed for field "Product.min_wholesale_quantity": %w`, err)}
+		}
+	}
 	if v, ok := puo.mutation.Stock(); ok {
 		if err := product.StockValidator(v); err != nil {
 			return &ValidationError{Name: "stock", err: fmt.Errorf(`ent: validator failed for field "Product.stock": %w`, err)}
@@ -613,6 +913,74 @@ func (puo *ProductUpdateOne) sqlSave(ctx context.Context) (_node *Product, err e
 			Type:   field.TypeFloat64,
 			Value:  value,
 			Column: product.FieldPrice,
+		})
+	}
+	if value, ok := puo.mutation.PurchasePrice(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: product.FieldPurchasePrice,
+		})
+	}
+	if value, ok := puo.mutation.AddedPurchasePrice(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: product.FieldPurchasePrice,
+		})
+	}
+	if value, ok := puo.mutation.RetailPrice(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: product.FieldRetailPrice,
+		})
+	}
+	if value, ok := puo.mutation.AddedRetailPrice(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: product.FieldRetailPrice,
+		})
+	}
+	if value, ok := puo.mutation.WholesalePrice(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: product.FieldWholesalePrice,
+		})
+	}
+	if value, ok := puo.mutation.AddedWholesalePrice(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: product.FieldWholesalePrice,
+		})
+	}
+	if puo.mutation.WholesalePriceCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Column: product.FieldWholesalePrice,
+		})
+	}
+	if value, ok := puo.mutation.MinWholesaleQuantity(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: product.FieldMinWholesaleQuantity,
+		})
+	}
+	if value, ok := puo.mutation.AddedMinWholesaleQuantity(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: product.FieldMinWholesaleQuantity,
+		})
+	}
+	if puo.mutation.MinWholesaleQuantityCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: product.FieldMinWholesaleQuantity,
 		})
 	}
 	if value, ok := puo.mutation.Stock(); ok {

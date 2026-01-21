@@ -6,6 +6,10 @@ import (
 	"Veritasbackend/ent/invoice"
 	"Veritasbackend/ent/invoiceitem"
 	"Veritasbackend/ent/product"
+	"Veritasbackend/ent/purchaseinvoice"
+	"Veritasbackend/ent/purchaseinvoiceitem"
+	"Veritasbackend/ent/supplier"
+	"Veritasbackend/ent/supplierpayment"
 	"Veritasbackend/ent/tenant"
 	"Veritasbackend/ent/user"
 	"context"
@@ -35,11 +39,15 @@ type OrderFunc func(*sql.Selector)
 // columnChecker returns a function indicates if the column exists in the given column.
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
-		invoice.Table:     invoice.ValidColumn,
-		invoiceitem.Table: invoiceitem.ValidColumn,
-		product.Table:     product.ValidColumn,
-		tenant.Table:      tenant.ValidColumn,
-		user.Table:        user.ValidColumn,
+		invoice.Table:             invoice.ValidColumn,
+		invoiceitem.Table:         invoiceitem.ValidColumn,
+		product.Table:             product.ValidColumn,
+		purchaseinvoice.Table:     purchaseinvoice.ValidColumn,
+		purchaseinvoiceitem.Table: purchaseinvoiceitem.ValidColumn,
+		supplier.Table:            supplier.ValidColumn,
+		supplierpayment.Table:     supplierpayment.ValidColumn,
+		tenant.Table:              tenant.ValidColumn,
+		user.Table:                user.ValidColumn,
 	}
 	check, ok := checks[table]
 	if !ok {
